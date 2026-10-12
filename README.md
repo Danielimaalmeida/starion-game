@@ -3,7 +3,7 @@
 Jogo local, sem internet, para o stand do 3D Day. Em três passos, o visitante faz o
 que o FIO faz automaticamente:
 
-1. **Elétrico**: monta a árvore elétrica (estação → functional unit → BMK).
+1. **Elétrico**: monta a árvore elétrica (estação → functional unit → BMK → article).
 2. **Mecânico**: monta a árvore mecânica.
 3. **Relações**: liga cada BMK elétrico ao mecânico que usa o mesmo article.
    No fim, "Tu vs. FIO" mostra o FIO a encontrar as relações sozinho.
@@ -24,9 +24,10 @@ Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` 
 
 - Passos 1 e 2: as peças flutuam devagar. Param quando o rato está em cima, quando são
   arrastadas ou quando já estão ligadas.
-  - Arrastar a peça: move-a, para arrumar a árvore.
+  - Arrastar a peça: move-a, para arrumar a árvore. Fica onde a largares e afasta-se
+    sozinha se cair em cima de outra.
   - Puxar o ponto ＋ de uma peça até outra: cria uma ligação (um fio). O sentido é
-    automático, do nível de cima para o de baixo. Peças do mesmo nível não se ligam.
+    automático, do nível de cima para o de baixo.
   - Também dá para clicar no ＋ e depois na outra peça.
 - Passo 3: arrastar de um cartão elétrico para um mecânico (ou clicar num e no outro).
 - Apagar uma ligação: clicar no `×` a meio do fio. `Limpar` apaga as do passo atual.
@@ -38,13 +39,17 @@ Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` 
 
 ## Trocar o conteúdo
 
-Tudo está em `data.js` (os dados atuais são fictícios):
+Tudo está em `data.js`. A árvore elétrica segue o board "3D Day – Jogo com fotos";
+a árvore mecânica e os BMKs `-Q1`, `-X1`, `-M1` são ilustrativos.
 
-- `articles`: peças físicas (só estas têm foto), com os campos do FIO.
-- `nodes`: as peças das duas árvores. `kind` é `station`, `fu` ou `bmk`, e `parent`
-  diz onde a peça pendura: é o gabarito dos passos 1 e 2. Os BMK apontam para um article.
-- `answerKey`: o gabarito do passo 3, pares `e` (elétrico) ↔ `m` (mecânico). Um BMK
-  pode ter vários pares. Um BMK fora do gabarito não tem par: ligá-lo é erro.
+- `articles`: peças concretas do fabricante (supplier.número), com os campos do FIO.
+- `nodes`: as peças das duas árvores. `kind` é `station`, `fu`, `bmk` ou `article`,
+  e `parent` diz onde a peça pendura: é o gabarito dos passos 1 e 2. A seta vai sempre
+  do nível de cima para o de baixo; ligar peças do mesmo nível é permitido, mas conta
+  como erro. Foto: `image` no próprio nó, ou a do seu `article`. Peças sem foto
+  aparecem como etiqueta.
+- `answerKey`: o gabarito do passo 3, pares `e` (elétrico) ↔ `m` (mecânico). Uma peça
+  pode ter vários pares. Uma peça com foto fora do gabarito não tem par: ligá-la é erro.
 - `config`: pontuação, dicas, deriva das peças (`drift`, `driftSpeed`), tempos de
   inatividade, cronómetro, `hidePhotos` (passo 3: esconde as fotos de um lado até
   passar o rato).
@@ -54,11 +59,17 @@ valor que tenhas medido.
 
 ## Imagens
 
-Põe os PNGs (versão com sombra) em `img/`, com o nome do campo `image` do article
-mais `.png`. Se faltar uma imagem aparece um quadrado tracejado com as iniciais.
-Os ficheiros usados pelos dados atuais:
+Ficam em `img/`, e o campo `image` é o caminho dentro de `img/` sem `.png`.
+Se faltar uma imagem aparece um quadrado tracejado com as iniciais.
 
-`sensor_M12_cabo`, `sensor_ifm_laranja`, `valvula_festo`, `motorredutor_vermelho`,
-`plc_siemens`, `controlador_robot_kuka`, `robot_kuka`, `rolos_transportador`.
+As exportações do board trazem o autocolante, a caixa de texto por baixo e margens
+brancas. Para ficar só com o autocolante:
+
+```
+python3 tools/crop_stickers.py      # img/*.png -> img/crop/*.png (precisa de Pillow)
+```
+
+Os originais ficam intactos e os dados usam `crop/<nome>`. Imagens já em falta (lado
+mecânico ilustrativo): `robot_kuka`, `garra_robot`, `rolos_transportador`, `perfil_aluminio`.
 
 Antes de qualquer uso fora da empresa, confirmar os direitos de imagem dos fabricantes.

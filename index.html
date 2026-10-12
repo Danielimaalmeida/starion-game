@@ -63,19 +63,22 @@
 
   /* free-floating pieces (steps 1 and 2) */
   .piece { position: absolute; left: 0; top: 0; z-index: 2; will-change: transform; cursor: grab; }
-  .piece.bmk { width: calc(var(--u) * 17); padding: calc(var(--u) * 1) calc(var(--u) * 1) calc(var(--u) * 2.9); text-align: center;
+  .piece.card { width: calc(var(--u) * 16); padding: calc(var(--u) * 1) calc(var(--u) * 1) calc(var(--u) * 2.9); text-align: center;
                background: var(--card); border-radius: calc(var(--u) * 1.8); box-shadow: 0 calc(var(--u) * .5) calc(var(--u) * 1.8) rgba(15,27,45,.2);
                border-top: calc(var(--u) * 1) solid var(--accent); }
   .electrical { --accent: var(--e); --tint: var(--e-tint); } .mechanical { --accent: var(--m); --tint: var(--m-tint); }
-  .piece .ph { height: calc(var(--u) * 14); display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .piece .ph { height: calc(var(--u) * 12); display: flex; align-items: center; justify-content: center; pointer-events: none; }
   .piece .thumb { max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; pointer-events: none;
                   filter: drop-shadow(0 calc(var(--u) * .3) calc(var(--u) * .5) rgba(15,27,45,.25)); }
   .piece .code { font-size: calc(var(--u) * 2.9); font-weight: 800; line-height: 1.15; pointer-events: none; }
   .piece .nm { font-size: calc(var(--u) * 1.9); color: var(--muted); line-height: 1.15; pointer-events: none; }
-  .piece.station, .piece.fu { padding: calc(var(--u) * 1.1) calc(var(--u) * 2.4) calc(var(--u) * 1.9); border-radius: calc(var(--u) * 1.3); font-weight: 800; white-space: nowrap;
+  .piece .code.long { font-size: calc(var(--u) * 1.9); overflow-wrap: anywhere; }
+  .piece.pill { padding: calc(var(--u) * 1.1) calc(var(--u) * 2.4) calc(var(--u) * 1.9); border-radius: calc(var(--u) * 1.3); font-weight: 800; white-space: nowrap;
                               box-shadow: 0 calc(var(--u) * .4) calc(var(--u) * 1.2) rgba(15,27,45,.2); }
-  .piece.station { background: var(--navy); color: #fff; font-size: calc(var(--u) * 2.9); }
-  .piece.fu { background: var(--tint); color: var(--accent); border: calc(var(--u) * .35) solid var(--accent); font-size: calc(var(--u) * 2.5); }
+  .piece.pill.station { background: var(--navy); color: #fff; font-size: calc(var(--u) * 2.9); }
+  .piece.pill.fu { background: var(--tint); color: var(--accent); border: calc(var(--u) * .35) solid var(--accent); font-size: calc(var(--u) * 2.5); }
+  .piece.pill.bmk, .piece.pill.article { background: #fff; color: var(--ink); border: calc(var(--u) * .3) dashed var(--accent); font-size: calc(var(--u) * 2.3);
+                                         font-family: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", monospace; }
   .piece .lbl { pointer-events: none; }
   .knob { position: absolute; left: 50%; bottom: calc(var(--u) * -2); width: calc(var(--u) * 4); height: calc(var(--u) * 4); margin-left: calc(var(--u) * -2);
           border-radius: 50%; background: var(--navy); color: #fff; border: calc(var(--u) * .45) solid #fff; display: flex; align-items: center; justify-content: center;
@@ -105,7 +108,7 @@
                border: calc(var(--u) * .25) solid #d5dbe5; border-radius: calc(var(--u) * 1.3); box-shadow: 0 calc(var(--u) * .2) calc(var(--u) * .6) rgba(15,27,45,.1); }
   .piece.rel.electrical { border-left: calc(var(--u) * 1) solid var(--e); }
   .piece.rel.mechanical { border-right: calc(var(--u) * 1) solid var(--m); flex-direction: row-reverse; text-align: right; }
-  .piece.rel .ph { flex: none; height: calc(var(--u) * 9.4); width: calc(var(--u) * 9.4); }
+  .piece.rel .ph { flex: none; height: calc(var(--u) * 8.4); width: calc(var(--u) * 8.4); }
   .piece.rel .txt { min-width: 0; flex: 1; pointer-events: none; }
   .piece.rel .code { font-size: calc(var(--u) * 2.7); } .piece.rel .nm { font-size: calc(var(--u) * 1.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .piece.rel:hover { border-color: #9aa7ba; }
@@ -228,11 +231,19 @@
   var $ = function (id) { return document.getElementById(id); };
   var stage = $("stage"), field = $("field"), svg = $("links"), marks = $("marks"), ghost = $("ghost"), info = $("info");
   var NS = "http://www.w3.org/2000/svg";
-  var RANK = { station: 0, fu: 1, bmk: 2 };
   var STEPS = [{ type: "build", side: "electrical" }, { type: "build", side: "mechanical" }, { type: "relate" }];
 
-  var nodeById = {};
+  var nodeById = {}, depth = {};
   D.nodes.forEach(function (n) { nodeById[n.id] = n; });
+  D.nodes.forEach(function (n) {   // level in the tree: 0 = root
+    var d = 0, p = n;
+    while (p.parent && nodeById[p.parent] && d < 20) { p = nodeById[p.parent]; d++; }
+    depth[n.id] = d;
+  });
+  function art(n) { return n.article ? D.articles[n.article] : null; }
+  function imageOf(n) { return n.image || (art(n) ? art(n).image : null); }
+  function supplierOf(n) { return n.supplier || (art(n) ? art(n).supplier : "") || ""; }
+  function rootOf(n) { while (n.parent && nodeById[n.parent]) n = nodeById[n.parent]; return n; }
 
   // ---------- helpers ----------
   function L(x) { return x && typeof x === "object" ? (x[lang] || x.pt || x.en || "") : (x || ""); }
@@ -258,16 +269,22 @@
     document.body.appendChild(p); var w = p.getBoundingClientRect().width; p.remove(); return w || 10;
   }
   function placeholder(name) {
-    var t = String(name).split("_").map(function (s) { return s.charAt(0); }).join("").slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, "");
+    name = String(name).split("/").pop();
+    var t = (name.indexOf("_") >= 0 ? name.split("_").map(function (s) { return s.charAt(0); }).join("") : name).replace(/[^A-Za-z0-9]/g, "").slice(0, 3).toUpperCase();
     return "data:image/svg+xml;utf8," + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="6" y="6" width="88" height="88" rx="16" fill="#eef1f5" stroke="#9aa5b4" stroke-width="3" stroke-dasharray="8 6"/><text x="50" y="60" font-family="sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#6b7787">' + t + "</text></svg>");
   }
-  function thumb(article, cls) {
+  function thumb(name, cls) {
     var img = new Image();
     img.className = cls; img.alt = ""; img.draggable = false;
-    img.onerror = function () { img.onerror = null; img.src = placeholder(article.image); };
-    img.src = cfg.imageDir + article.image + cfg.imageExt;
+    img.onerror = function () { img.onerror = null; img.src = placeholder(name); };
+    img.src = cfg.imageDir + String(name).split("/").map(encodeURIComponent).join("/") + cfg.imageExt;
     return img;
+  }
+  function codeEl(n) {   // long article codes wrap after "supplier."
+    var d = make("div", "code mono" + (n.code.length > 9 ? " long" : ""));
+    n.code.split(/(?<=\.)/).forEach(function (part, i) { if (i) d.appendChild(document.createElement("wbr")); d.appendChild(document.createTextNode(part)); });
+    return d;
   }
   function label(n) { return n.code + " · " + n.name; }
   function sideNodes(side) { return D.nodes.filter(function (n) { return n.side === side; }); }
@@ -302,8 +319,8 @@
     var nx = nodeById[x], ny = nodeById[y], a, b;
     if (!nx || !ny || x === y) return "invalid";
     if (type() === "build") {
-      if (RANK[nx.kind] === RANK[ny.kind]) return "level";
-      a = RANK[nx.kind] < RANK[ny.kind] ? x : y; b = a === x ? y : x;
+      a = depth[x] < depth[y] ? x : depth[x] > depth[y] ? y : x;   // upper level is the parent; same level: where the drag started
+      b = a === x ? y : x;
     } else {
       if (nx.side === ny.side) return "side";
       a = nx.side === "electrical" ? x : y; b = a === x ? y : x;
@@ -326,18 +343,18 @@
     var ce = nodeById[l.a], cm = nodeById[l.b];
     if (!inKey(l.a)) return L(ce.note) || T.noPair(ce.code, T.sideWord.electrical);
     if (!inKey(l.b)) return L(cm.note) || T.noPair(cm.code, T.sideWord.mechanical);
-    return D.articles[ce.article].supplier === D.articles[cm.article].supplier ? T.sameSupplier : T.wrongPair;
+    return supplierOf(ce) && supplierOf(ce) === supplierOf(cm) ? T.sameSupplier : T.wrongPair;
   }
 
   // ---------- step 1/2: free-floating field ----------
   function buildField(side) {
     field.replaceChildren(); els = {}; P = {};
     sideNodes(side).forEach(function (n) {
-      var node = make("div", "piece " + n.kind + " " + n.side);
+      var photo = imageOf(n), node = make("div", "piece " + (photo ? "card " : "pill ") + n.kind + " " + n.side);
       node.dataset.id = n.id;
-      if (n.kind === "bmk") {
-        var ph = make("div", "ph"); ph.appendChild(thumb(D.articles[n.article], "thumb"));
-        node.appendChild(ph); node.appendChild(make("div", "code mono", n.code)); node.appendChild(make("div", "nm", n.name));
+      if (photo) {
+        var ph = make("div", "ph"); ph.appendChild(thumb(photo, "thumb"));
+        node.appendChild(ph); node.appendChild(codeEl(n)); node.appendChild(make("div", "nm", n.name));
       } else node.appendChild(make("div", "lbl", label(n)));
       node.appendChild(make("i", "knob", "+"));
       field.appendChild(node); els[n.id] = node; P[n.id] = { x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, dragging: false };
@@ -368,6 +385,23 @@
     var B = bounds();
     p.x = Math.min(Math.max(0, p.x), Math.max(0, B.w - p.w)); p.y = Math.min(Math.max(0, p.y), Math.max(0, B.h - p.h));
   }
+  // A piece dropped on top of others slides the least it can until it sits beside them.
+  function settle(id) {
+    var a = P[id], m = 0.8 * U;
+    for (var it = 0; it < 12; it++) {
+      var hitAny = false;
+      for (var ib in P) {
+        var b = P[ib]; if (b === a || !overlap(a, b, m)) continue;
+        hitAny = true;
+        var ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x) + m, oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y) + m;
+        if (ox < oy) a.x += (a.x + a.w / 2 < b.x + b.w / 2 ? -1 : 1) * ox;
+        else a.y += (a.y + a.h / 2 < b.y + b.h / 2 ? -1 : 1) * oy;
+        clampPiece(a);
+      }
+      if (!hitAny) break;
+    }
+    els[id]._t = null;
+  }
   var lastTs = 0;
   function tick(ts) {
     requestAnimationFrame(tick);
@@ -376,7 +410,7 @@
     var ids = Object.keys(P), B = bounds(), drifting = cfg.drift && mode === "play";
     ids.forEach(function (id) {
       var p = P[id];
-      p.free = drifting && !p.dragging && hoverId !== id && armed !== id && !linked(id);
+      p.free = drifting && !p.dragging && !p.pinned && hoverId !== id && armed !== id && !linked(id);   // pieces placed by hand stay put
       if (!p.free) return;
       p.x += p.vx * dt; p.y += p.vy * dt;
       if (p.x < 0) { p.x = 0; p.vx = Math.abs(p.vx); } else if (p.x > B.w - p.w) { p.x = B.w - p.w; p.vx = -Math.abs(p.vx); }
@@ -407,17 +441,21 @@
     ["electrical", "mechanical"].forEach(function (side) {
       var root = $(side === "electrical" ? "colE" : "colM").querySelector(".groups");
       root.replaceChildren();
-      sideNodes(side).filter(function (n) { return n.kind === "fu"; }).forEach(function (fu) {
-        var cards = sideNodes(side).filter(function (n) { return n.parent === fu.id; });
+      sideNodes(side).filter(function (n) { return !n.parent; }).forEach(function (top) {
+        var cards = [];
+        (function walk(id) {
+          sideNodes(side).forEach(function (c) { if (c.parent === id) { if (imageOf(c)) cards.push(c); walk(c.id); } });
+        })(top.id);
+        if (!cards.length) return;
         if (cfg.shuffle) shuffle(cards);
         var box = make("div", "group " + side); box.style.flex = cards.length + " 1 0";
-        var head = make("div", "ghead", label(fu)); groupHeads[fu.id] = head;
+        var head = make("div", "ghead", label(top)); groupHeads[top.id] = head;
         var list = make("div", "cards");
         cards.forEach(function (c) {
-          var n = make("div", "piece rel bmk " + side); n.dataset.id = c.id;
+          var n = make("div", "piece rel " + c.kind + " " + side); n.dataset.id = c.id;
           if (cfg.hidePhotos === side) n.classList.add("nophoto");
-          var ph = make("div", "ph"); ph.appendChild(thumb(D.articles[c.article], "thumb"));
-          var txt = make("div", "txt"); txt.appendChild(make("div", "code mono", c.code)); txt.appendChild(make("div", "nm", c.name));
+          var ph = make("div", "ph"); ph.appendChild(thumb(imageOf(c), "thumb"));
+          var txt = make("div", "txt"); txt.appendChild(codeEl(c)); txt.appendChild(make("div", "nm", c.name));
           n.appendChild(ph); n.appendChild(txt); n.appendChild(make("i", "dot"));
           els[c.id] = n; list.appendChild(n);
         });
@@ -639,20 +677,20 @@
   function showNode(id) {
     var n = nodeById[id]; info.replaceChildren();
     var body = make("div", "ibody");
-    if (n.kind === "bmk") {
-      var a = D.articles[n.article];
-      var t = make("div", "ititle mono", n.code + "  ·  " + a.title);
-      t.appendChild(make("small", null, n.name + " — " + label(nodeById[n.parent])));
-      body.appendChild(t);
-      var f = make("div", "fields");
-      var row = function (lb, val) { var d = make("div"); d.appendChild(make("span", null, lb + ": ")); d.appendChild(document.createTextNode(val)); f.appendChild(d); };
+    var a = art(n), f = make("div", "fields");
+    var row = function (lb, val) { var d = make("div"); d.appendChild(make("span", null, lb + ": ")); d.appendChild(document.createTextNode(val)); f.appendChild(d); };
+    var t = make("div", "ititle mono", a && a.title !== n.code ? n.code + "  ·  " + a.title : n.code);
+    t.appendChild(make("small", null, n.name + "  ·  " + T.kindWord[n.kind]));
+    body.appendChild(t);
+    if (a) {
       row(T.fields.description, a.description); row(T.fields.supplier, a.supplier);
       row(T.fields.subgroup, a.subgroupNumber + " – " + a.subgroup); row(T.fields.type, a.typeDesignation);
       body.appendChild(f);
-    } else {
-      body.appendChild(make("div", "ititle mono", label(n)));
-      body.appendChild(make("div", "msg", T.kindInfo[n.kind]));
-    }
+    } else if (n.description || n.supplier) {
+      if (n.description) row(T.fields.description, n.description);
+      if (n.supplier) row(T.fields.supplier, n.supplier);
+      body.appendChild(f);
+    } else body.appendChild(make("div", "msg", T.kindInfo[n.kind]));
     info.appendChild(body);
   }
   function showWhy(it) {
@@ -683,9 +721,10 @@
       if (hint.level >= 3) { hint.pieces[k.a] = true; hint.msg = T.hintB3; }
     } else {
       hint.pieces[k.a] = true;
-      if (hint.level === 1) hint.msg = T.hint1(A.code, D.articles[B.article].supplier);
-      if (hint.level === 2) { hint.groups[B.parent] = true; hint.msg = T.hint2(label(nodeById[B.parent])); }
-      if (hint.level >= 3) { hint.groups[B.parent] = true; hint.pieces[k.b] = true; hint.msg = T.hint3; }
+      var R = rootOf(B);
+      if (hint.level === 1) hint.msg = supplierOf(B) ? T.hint1(A.code, supplierOf(B)) : T.hint2(label(R));
+      if (hint.level === 2) { hint.groups[R.id] = true; hint.msg = T.hint2(label(R)); }
+      if (hint.level >= 3) { hint.groups[R.id] = true; hint.pieces[k.b] = true; hint.msg = T.hint3; }
     }
     render();
   }
@@ -779,10 +818,7 @@
   function bump(node) { node.classList.add("shake"); setTimeout(function () { node.classList.remove("shake"); }, 400); }
   function tryLink(from, to, targetEl) {
     var r = addLink(from, to);
-    if (r === "level" || r === "side") {
-      if (targetEl) bump(targetEl);
-      if (r === "level") { flash = T.sameLevel; setTimeout(function () { flash = null; if (hoverId == null) showDefault(); }, 3000); }
-    }
+    if (r === "side" && targetEl) bump(targetEl);
     return r;
   }
 
@@ -825,7 +861,7 @@
     var d = drag; drag = null; ghost.replaceChildren();
     for (var id in els) els[id].classList.remove("drop");
     try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
-    if (d.kind === "move") { P[d.from].dragging = false; els[d.from].classList.remove("dragging"); }
+    if (d.kind === "move") { P[d.from].dragging = false; if (d.moved) { P[d.from].pinned = true; settle(d.from); } els[d.from].classList.remove("dragging"); }
     if (cancelled) { render(); return; }
     var t = pieceAt(e.clientX, e.clientY), tid = t && els[t.dataset.id] === t ? t.dataset.id : null;
     if (d.kind === "link") {
