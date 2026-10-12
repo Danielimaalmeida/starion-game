@@ -137,7 +137,7 @@
   .link .hit { fill: none; stroke: transparent; stroke-width: calc(var(--u) * 2.6); pointer-events: stroke; }
   .link.removable .hit, .link.removable .mk { cursor: pointer; }
   .link:hover .line { stroke-width: calc(var(--u) * .95); }
-  .link.ok .line { stroke: var(--ok); } .link.bad .line { stroke: var(--bad); }
+  .link.ok .line { stroke: var(--rope, var(--ok)); } .link.bad .line { stroke: var(--bad); }
   .link.missing .line { stroke: var(--warn); stroke-width: calc(var(--u) * .9); stroke-dasharray: 0 calc(var(--u) * 1.6); }
   .link.dim { opacity: .16; }
   .link.fio .line { stroke: var(--fio); stroke-width: calc(var(--u) * .8); }
@@ -560,8 +560,9 @@
     var cls = "link " + it.cls + (it.removable ? " removable" : "");
     var g = S("g", { "class": cls }), targets = [g];
     var halo = S("path", { d: G.d, "class": "halo" }), line = S("path", { d: G.d, "class": "line" }), hit = S("path", { d: G.d, "class": "hit" });
-    if (build && it.cls !== "dim") line.setAttribute("marker-end", "url(#dot-" + (it.cls === "play" ? "play-" + STEPS[step].side.charAt(0) : it.cls) + ")");
-    if (!build && it.cls === "play") line.style.stroke = "url(#rope-grad)";
+    var sideColour = it.cls === "play" || it.cls === "ok";
+    if (build && it.cls !== "dim") line.setAttribute("marker-end", "url(#dot-" + (sideColour ? "play-" + STEPS[step].side.charAt(0) : it.cls) + ")");
+    if (!build && sideColour) line.style.stroke = "url(#rope-grad)";
     g.appendChild(halo); g.appendChild(line); g.appendChild(hit);
     svg.appendChild(g);
     var entry = { it: it, paths: [halo, line, hit], mk: null };
