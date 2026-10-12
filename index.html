@@ -75,7 +75,15 @@
   .card.mechanical { border-right: calc(var(--u) * 1) solid var(--m); flex-direction: row-reverse; text-align: right; }
   .card:hover { border-color: #9aa7ba; }
   .card.electrical:hover { border-left-color: var(--e); } .card.mechanical:hover { border-right-color: var(--m); }
-  .card .thumb { flex: none; height: calc(var(--u) * 5.4); width: calc(var(--u) * 5.4); object-fit: contain; pointer-events: none; }
+  .card .tw { position: relative; flex: none; height: calc(var(--u) * 5.4); width: calc(var(--u) * 5.4); pointer-events: none; }
+  .card .thumb { width: 100%; height: 100%; object-fit: contain; }
+  .card .q { position: absolute; inset: calc(var(--u) * .3); display: none; align-items: center; justify-content: center;
+             border: calc(var(--u) * .25) dashed #9aa5b4; border-radius: calc(var(--u) * 1); background: #eef1f5;
+             color: #7a8799; font-size: calc(var(--u) * 3); font-weight: 800; }
+  .card.nophoto:not(:hover) .thumb { opacity: 0; }
+  .card.nophoto:not(:hover) .q { display: flex; }
+  .locked .card.nophoto .thumb { opacity: 1; }
+  .locked .card.nophoto .q { display: none; }
   .card .txt { min-width: 0; flex: 1; pointer-events: none; }
   .card .bmk { font-size: calc(var(--u) * 2.5); font-weight: 800; line-height: 1.1; }
   .card .nm { font-size: calc(var(--u) * 1.8); color: var(--muted); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -266,7 +274,10 @@
           var txt = el("div", "txt");
           txt.appendChild(el("div", "bmk mono", c.bmk));
           txt.appendChild(el("div", "nm", c.name));
-          n.appendChild(thumb(a, "thumb"));
+          var tw = el("div", "tw");
+          tw.appendChild(thumb(a, "thumb")); tw.appendChild(el("span", "q", "?"));
+          if (cfg.hidePhotos === side) n.classList.add("nophoto");
+          n.appendChild(tw);
           n.appendChild(txt);
           n.appendChild(el("i", "dot"));
           cardNodes[c.id] = n; list.appendChild(n);

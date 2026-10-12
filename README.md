@@ -35,6 +35,9 @@ Tudo está em `data.js` (os dados atuais são fictícios):
 - `answerKey`: o gabarito, pares `e` (elétrico) ↔ `m` (mecânico). Um cartão pode ter
   vários pares. Um cartão que não está no gabarito não tem par: ligá-lo é erro.
 - `config`: pontuação, número de dicas, tempos de inatividade, baralhar, cronómetro.
+  `hidePhotos` (`"mechanical"`, `"electrical"` ou `"none"`) esconde as fotos desse lado
+  até passar o rato, para o visitante ter de ler o article em vez de comparar imagens.
+  Depois de Verificar as fotos aparecem todas.
 
 `config.fioSeconds` está a `null` (não mostra tempo do FIO). Só o preenchas com um
 valor que tenhas medido.

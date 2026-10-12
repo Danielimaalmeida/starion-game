@@ -22,6 +22,7 @@ window.FIO_DATA = {
     imageDir: "img/",        // folder with the sticker PNGs
     imageExt: ".png",
     shuffle: true,           // shuffle card order inside each group on every game
+    hidePhotos: "mechanical", // "none" | "electrical" | "mechanical": that side shows "?" until hover; all revealed after Check
     showTimer: true,
     maxHints: 3,
     idleSeconds: 60,         // no input for this long -> back to the welcome screen
@@ -183,7 +184,7 @@ window.FIO_DATA = {
       electrical: "Elétrico (ePlan)",
       mechanical: "Mecânico (BOM)",
       sideWord: { electrical: "elétrico", mechanical: "mecânico" },
-      instruction: "Arrasta de um cartão até ao seu par do outro lado (ou clica num e depois no outro).",
+      instruction: "Arrasta de um cartão até ao seu par do outro lado (ou clica num e depois no outro). Passa o rato num cartão para ver o article.",
       armed: "Agora clica no cartão do outro lado.",
       hint: "Dica", check: "Verificar", fio: "Tu vs. FIO", reset: "Recomeçar",
       links: n => n + (n === 1 ? " ligação" : " ligações"),
@@ -223,7 +224,7 @@ window.FIO_DATA = {
       electrical: "Electrical (ePlan)",
       mechanical: "Mechanical (BOM)",
       sideWord: { electrical: "electrical", mechanical: "mechanical" },
-      instruction: "Drag from a card to its partner on the other side (or click one, then the other).",
+      instruction: "Drag from a card to its partner on the other side (or click one, then the other). Hover a card to see its article.",
       armed: "Now click the card on the other side.",
       hint: "Hint", check: "Check", fio: "You vs. FIO", reset: "Restart",
       links: n => n + (n === 1 ? " link" : " links"),
