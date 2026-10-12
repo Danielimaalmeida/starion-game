@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FIO – Encontra as relações</title>
+<style>
+  /* --u scales everything: ~10.8 px on a 1920x1080 screen. */
+  :root {
+    --u: min(1vh, 0.5625vw);
+    --bg: #f2f4f8; --ink: #17202c; --muted: #566274; --card: #ffffff;
+    --e: #a85500; --e-tint: #fff1dc;
+    --m: #1b50ad; --m-tint: #e3ecff;
+    --line: #2b3646; --ok: #12763a; --bad: #c0261d; --warn: #b45309;
+    --fio: #6d28d9; --hint: #f59e0b; --navy: #0f1b2d;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink);
+    font-family: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-user-select: none; user-select: none; cursor: default;
+  }
+  button { font: inherit; cursor: pointer; }
+  .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", monospace; }
+
+  #app { position: fixed; inset: 0; display: grid;
+         grid-template-rows: calc(var(--u) * 10) 1fr calc(var(--u) * 13); }
+
+  /* ---------- header ---------- */
+  #top { display: flex; align-items: center; gap: calc(var(--u) * 3); padding: 0 calc(var(--u) * 3);
+         background: var(--navy); color: #fff; }
+  .brand { display: flex; align-items: baseline; gap: calc(var(--u) * 1.4); white-space: nowrap; }
+  .brand b { font-size: calc(var(--u) * 4); letter-spacing: .04em; }
+  .brand span { font-size: calc(var(--u) * 1.7); opacity: .75; }
+  #status { flex: 1; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 2.2);
+            font-size: calc(var(--u) * 2.3); min-width: 0; }
+  #status .score b { font-size: calc(var(--u) * 4.4); }
+  #status .score small { font-size: calc(var(--u) * 1.8); opacity: .8; margin-left: calc(var(--u) * .6); }
+  #status .chip { padding: calc(var(--u) * .4) calc(var(--u) * 1.2); border-radius: 999px; font-weight: 700;
+                  background: #fff; }
+  #status .chip.ok { color: var(--ok); } #status .chip.bad { color: var(--bad); } #status .chip.miss { color: var(--warn); }
+  #status .dim { opacity: .8; }
+  .actions { display: flex; gap: calc(var(--u) * 1.2); }
+  .btn { height: calc(var(--u) * 6); padding: 0 calc(var(--u) * 2.6); border-radius: calc(var(--u) * 1);
+         border: calc(var(--u) * .2) solid transparent; font-size: calc(var(--u) * 2.3); font-weight: 700;
+         background: #fff; color: var(--navy); white-space: nowrap; }
+  .btn:hover:not(:disabled) { filter: brightness(.94); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+  .btn.primary { background: #ffd23f; border-color: #ffd23f; }
+  .btn.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.55); }
+  .btn.hidden { display: none; }
+
+  /* ---------- stage ---------- */
+  #stage { position: relative; display: grid; grid-template-columns: 1fr .85fr 1fr;
+           padding: calc(var(--u) * 1.4) calc(var(--u) * 3) calc(var(--u) * 1); min-height: 0; touch-action: none; }
+  .col { display: flex; flex-direction: column; min-height: 0; }
+  .col h2 { margin: 0 0 calc(var(--u) * .8); height: calc(var(--u) * 3.4); font-size: calc(var(--u) * 2.1);
+            letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; }
+  #colE h2 { color: var(--e); } #colM h2 { color: var(--m); justify-content: flex-end; }
+  .groups { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 1.2); }
+  .group { display: flex; flex-direction: column; gap: calc(var(--u) * .8); min-height: 0; }
+  .ghead { height: calc(var(--u) * 3); display: flex; align-items: center; padding: 0 calc(var(--u) * 1.2);
+           font-size: calc(var(--u) * 1.85); font-weight: 700; border-radius: calc(var(--u) * .8); white-space: nowrap; overflow: hidden; }
+  .electrical .ghead { background: var(--e-tint); color: var(--e); }
+  .mechanical .ghead { background: var(--m-tint); color: var(--m); }
+  .ghead.hint { animation: glow 1s ease-in-out infinite alternate; }
+  .cards { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: calc(var(--u) * .8); }
+
+  .card { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; gap: calc(var(--u) * 1.3);
+          padding: calc(var(--u) * .5) calc(var(--u) * 1.4); background: var(--card);
+          border: calc(var(--u) * .25) solid #d5dbe5; border-radius: calc(var(--u) * 1.2);
+          box-shadow: 0 calc(var(--u) * .2) calc(var(--u) * .6) rgba(15,27,45,.1); cursor: grab; }
+  .card.electrical { border-left: calc(var(--u) * 1) solid var(--e); }
+  .card.mechanical { border-right: calc(var(--u) * 1) solid var(--m); flex-direction: row-reverse; text-align: right; }
+  .card:hover { border-color: #9aa7ba; }
+  .card.electrical:hover { border-left-color: var(--e); } .card.mechanical:hover { border-right-color: var(--m); }
+  .card .thumb { flex: none; height: calc(var(--u) * 5.4); width: calc(var(--u) * 5.4); object-fit: contain; pointer-events: none; }
+  .card .txt { min-width: 0; flex: 1; pointer-events: none; }
+  .card .bmk { font-size: calc(var(--u) * 2.5); font-weight: 800; line-height: 1.1; }
+  .card .nm { font-size: calc(var(--u) * 1.8); color: var(--muted); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .dot { position: absolute; top: 50%; width: calc(var(--u) * 2); height: calc(var(--u) * 2); margin-top: calc(var(--u) * -1);
+               border-radius: 50%; background: #fff; border: calc(var(--u) * .35) solid currentColor; pointer-events: none; }
+  .card.electrical .dot { right: calc(var(--u) * -1.15); color: var(--e); }
+  .card.mechanical .dot { left: calc(var(--u) * -1.15); color: var(--m); }
+  .card.linked .dot { background: currentColor; }
+  .card.armed { outline: calc(var(--u) * .45) solid var(--navy); outline-offset: calc(var(--u) * .2); }
+  .card.drop { background: #fffbe6; border-color: var(--hint); }
+  .card.hint { animation: glow 1s ease-in-out infinite alternate; }
+  .card.shake { animation: shake .35s; }
+  .locked .card { cursor: default; }
+  @keyframes glow { from { box-shadow: 0 0 0 calc(var(--u) * .2) var(--hint), 0 0 calc(var(--u) * .8) var(--hint); }
+                    to   { box-shadow: 0 0 0 calc(var(--u) * .5) var(--hint), 0 0 calc(var(--u) * 2.6) var(--hint); } }
+  @keyframes shake { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+
+  svg.layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .link .line { fill: none; stroke-linecap: round; stroke-width: calc(var(--u) * .55); stroke: var(--line); }
+  .link .hit { fill: none; stroke: transparent; stroke-width: calc(var(--u) * 2.6); pointer-events: stroke; }
+  .link.removable .hit { cursor: pointer; }
+  .link:hover .line { stroke-width: calc(var(--u) * .9); }
+  .link.ok .line { stroke: var(--ok); } .link.bad .line { stroke: var(--bad); }
+  .link.missing .line { stroke: var(--ok); stroke-dasharray: calc(var(--u) * 1.3) calc(var(--u) * 1.1); opacity: .9; }
+  .link.dim { opacity: .16; }
+  .link.fio .line { stroke: var(--fio); stroke-width: calc(var(--u) * .8); }
+  .link .mk { pointer-events: all; }
+  .link.removable .mk { cursor: pointer; }
+  .mk circle { fill: #fff; stroke: var(--line); stroke-width: calc(var(--u) * .3); }
+  .mk text { font-weight: 800; text-anchor: middle; dominant-baseline: central; fill: var(--line); }
+  .link.removable:hover .mk circle { fill: var(--bad); stroke: var(--bad); } .link.removable:hover .mk text { fill: #fff; }
+  .link.ok .mk circle { fill: var(--ok); stroke: var(--ok); } .link.ok .mk text { fill: #fff; }
+  .link.bad .mk circle { fill: var(--bad); stroke: var(--bad); } .link.bad .mk text { fill: #fff; }
+  .link.missing .mk circle { fill: #fff; stroke: var(--warn); } .link.missing .mk text { fill: var(--warn); }
+  #ghost path { fill: none; stroke: var(--navy); stroke-width: calc(var(--u) * .55); stroke-linecap: round;
+                stroke-dasharray: calc(var(--u) * 1.2) calc(var(--u) * 1); }
+
+  /* ---------- footer / details ---------- */
+  #info { display: flex; align-items: center; gap: calc(var(--u) * 2.2); padding: 0 calc(var(--u) * 3);
+          background: #fff; border-top: calc(var(--u) * .25) solid #d5dbe5; min-width: 0; }
+  #info .msg { font-size: calc(var(--u) * 2.4); color: var(--muted); line-height: 1.3; }
+  #info .msg b { color: var(--ink); }
+  #info .ithumb { flex: none; height: calc(var(--u) * 10); width: calc(var(--u) * 10); object-fit: contain; }
+  #info .ibody { flex: 1; min-width: 0; }
+  #info .ititle { font-size: calc(var(--u) * 2.5); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #info .ititle small { font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif; font-weight: 600; color: var(--muted); font-size: calc(var(--u) * 1.8); margin-left: calc(var(--u) * 1); }
+  #info .fields { display: grid; grid-template-columns: 1.5fr 1fr; gap: calc(var(--u) * .2) calc(var(--u) * 2.4);
+                  margin-top: calc(var(--u) * .5); font-size: calc(var(--u) * 1.85); }
+  #info .fields span { color: var(--muted); }
+  #info .fields div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #info .why { font-size: calc(var(--u) * 2.5); font-weight: 600; }
+  #info .why.ok { color: var(--ok); } #info .why.bad { color: var(--bad); } #info .why.miss { color: var(--warn); }
+
+  /* ---------- overlays ---------- */
+  .overlay { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;
+             text-align: center; color: #fff; padding: calc(var(--u) * 4);
+             background: radial-gradient(circle at 30% 20%, #1d3557, var(--navy) 70%); }
+  .overlay.hidden { display: none; }
+  .overlay.dark { background: rgba(15,27,45,.88); }
+  .overlay h1 { margin: 0; font-size: calc(var(--u) * 9); letter-spacing: .02em; }
+  .overlay .kicker { font-size: calc(var(--u) * 2.6); letter-spacing: .25em; text-transform: uppercase; opacity: .7; margin-bottom: calc(var(--u) * 1.5); }
+  .overlay .lead { font-size: calc(var(--u) * 3); max-width: calc(var(--u) * 100); margin: calc(var(--u) * 2) 0 calc(var(--u) * 4); opacity: .92; line-height: 1.3; }
+  .steps { display: flex; gap: calc(var(--u) * 2.5); margin-bottom: calc(var(--u) * 5); }
+  .step { width: calc(var(--u) * 34); padding: calc(var(--u) * 2.2); background: rgba(255,255,255,.08); border-radius: calc(var(--u) * 1.6);
+          font-size: calc(var(--u) * 2.2); line-height: 1.3; text-align: left; }
+  .step b { display: block; font-size: calc(var(--u) * 4.4); color: #ffd23f; margin-bottom: calc(var(--u) * .6); }
+  .btn.big { height: calc(var(--u) * 10); padding: 0 calc(var(--u) * 7); font-size: calc(var(--u) * 4); border-radius: calc(var(--u) * 2); }
+  .overlay .count { font-size: calc(var(--u) * 3.2); margin: calc(var(--u) * 2) 0 calc(var(--u) * 4); }
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="top">
+    <div class="brand"><b>FIO</b><span id="brandSub"></span></div>
+    <div id="status"></div>
+    <div class="actions">
+      <button class="btn" id="btnHint" type="button"></button>
+      <button class="btn primary" id="btnCheck" type="button"></button>
+      <button class="btn ghost" id="btnReset" type="button"></button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <section class="col electrical" id="colE"><h2 id="hE"></h2><div class="groups"></div></section>
+    <div></div>
+    <section class="col mechanical" id="colM"><h2 id="hM"></h2><div class="groups"></div></section>
+    <svg class="layer" id="links"></svg>
+    <svg class="layer" id="ghost"></svg>
+  </main>
+
+  <footer id="info"></footer>
+</div>
+
+<div class="overlay" id="welcome">
+  <div class="kicker" id="wKicker"></div>
+  <h1 id="wTitle"></h1>
+  <p class="lead" id="wLead"></p>
+  <div class="steps" id="wSteps"></div>
+  <button class="btn primary big" id="btnStart" type="button"></button>
+</div>
+
+<div class="overlay dark hidden" id="idle">
+  <h1 id="iTitle"></h1>
+  <div class="count" id="iCount"></div>
+  <button class="btn primary big" id="btnKeep" type="button"></button>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.FIO_DATA, cfg = D.config;
+  var lang = new URLSearchParams(location.search).get("lang") || cfg.lang || "pt";
+  var T = D.ui[lang] || D.ui.pt;
+  document.documentElement.lang = lang === "pt" ? "pt-PT" : lang;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var stage = $("stage"), svg = $("links"), ghost = $("ghost"), info = $("info");
+  var NS = "http://www.w3.org/2000/svg";
+
+  var cardById = {}, groupById = {};
+  D.cards.forEach(function (c) { cardById[c.id] = c; });
+  D.groups.forEach(function (g) { groupById[g.id] = g; });
+
+  // ---------- helpers ----------
+  function L(x) { return x && typeof x === "object" ? (x[lang] || x.pt || x.en || "") : (x || ""); }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function S(tag, attrs) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function fmtTime(ms) { var s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+  function unit() {
+    var p = document.createElement("div");
+    p.style.cssText = "position:absolute;visibility:hidden;width:calc(var(--u) * 1)";
+    document.body.appendChild(p); var w = p.getBoundingClientRect().width; p.remove(); return w || 10;
+  }
+  function placeholder(name) {
+    var t = String(name).split("_").map(function (s) { return s.charAt(0); }).join("").slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return "data:image/svg+xml;utf8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="6" y="6" width="88" height="88" rx="16" fill="#eef1f5" stroke="#9aa5b4" stroke-width="3" stroke-dasharray="8 6"/><text x="50" y="60" font-family="sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#6b7787">' + t + "</text></svg>");
+  }
+  function thumb(article, cls) {
+    var img = new Image();
+    img.className = cls; img.alt = ""; img.draggable = false;
+    img.onerror = function () { img.onerror = null; img.src = placeholder(article.image); };
+    img.src = cfg.imageDir + article.image + cfg.imageExt;
+    return img;
+  }
+
+  // ---------- state ----------
+  var phase = "welcome";            // welcome | play | checked | fio
+  var links = [];                   // { e, m }
+  var results = null;               // after check: { items, missing, correct, wrong, score }
+  var armed = null, hoverId = null;
+  var hint = { used: 0, pair: null, level: 0, msg: "", cards: {}, groups: {} };
+  var startTime = 0, endTime = 0, lastActivity = Date.now(), idleShown = false, animateFio = false;
+  var cardNodes = {}, groupHeads = {};
+  var U = 10;
+
+  // ---------- build columns ----------
+  function buildColumns() {
+    cardNodes = {}; groupHeads = {};
+    ["electrical", "mechanical"].forEach(function (side) {
+      var root = $(side === "electrical" ? "colE" : "colM").querySelector(".groups");
+      root.replaceChildren();
+      D.groups.filter(function (g) { return g.side === side; }).forEach(function (g) {
+        var cards = D.cards.filter(function (c) { return c.group === g.id; });
+        if (cfg.shuffle) shuffle(cards);
+        var box = el("div", "group");
+        box.style.flex = cards.length + " 1 0";
+        var head = el("div", "ghead", g.label); groupHeads[g.id] = head;
+        var list = el("div", "cards");
+        cards.forEach(function (c) {
+          var a = D.articles[c.article];
+          var n = el("div", "card " + side);
+          n.dataset.id = c.id;
+          var txt = el("div", "txt");
+          txt.appendChild(el("div", "bmk mono", c.bmk));
+          txt.appendChild(el("div", "nm", c.name));
+          n.appendChild(thumb(a, "thumb"));
+          n.appendChild(txt);
+          n.appendChild(el("i", "dot"));
+          cardNodes[c.id] = n; list.appendChild(n);
+        });
+        box.appendChild(head); box.appendChild(list); root.appendChild(box);
+      });
+    });
+  }
+
+  // ---------- geometry ----------
+  function anchor(id) {
+    var r = cardNodes[id].getBoundingClientRect(), s = stage.getBoundingClientRect();
+    return { x: (cardById[id].side === "electrical" ? r.right : r.left) - s.left, y: r.top + r.height / 2 - s.top };
+  }
+  function pathD(a, b) {
+    var dx = (b.x - a.x) / 2;
+    return "M" + a.x + " " + a.y + " C" + (a.x + dx) + " " + a.y + " " + (b.x - dx) + " " + b.y + " " + b.x + " " + b.y;
+  }
+
+  // ---------- links ----------
+  function hasLink(e, m) { return links.some(function (l) { return l.e === e && l.m === m; }); }
+  function addLink(a, b) {
+    var ca = cardById[a], cb = cardById[b];
+    if (!ca || !cb || ca.side === cb.side) return false;
+    var e = ca.side === "electrical" ? a : b, m = ca.side === "electrical" ? b : a;
+    if (hasLink(e, m)) return false;
+    links.push({ e: e, m: m });
+    if (hint.pair && hint.pair.e === e && hint.pair.m === m) clearHint();
+    return true;
+  }
+  function removeLink(e, m) {
+    links = links.filter(function (l) { return !(l.e === e && l.m === m); });
+    render();
+  }
+
+  function keyFor(e, m) { return D.answerKey.filter(function (k) { return k.e === e && k.m === m; })[0]; }
+  function inKey(id) { return D.answerKey.some(function (k) { return k.e === id || k.m === id; }); }
+  function wrongWhy(l) {
+    var ce = cardById[l.e], cm = cardById[l.m];
+    if (!inKey(l.e)) return L(ce.note) || T.noPair(ce.bmk, T.sideWord.electrical);
+    if (!inKey(l.m)) return L(cm.note) || T.noPair(cm.bmk, T.sideWord.mechanical);
+    var same = D.articles[ce.article].supplier === D.articles[cm.article].supplier;
+    return same ? T.sameSupplier : T.wrongPair;
+  }
+
+  // ---------- rendering ----------
+  function marker(g, x, y, text, size) {
+    var m = S("g", { "class": "mk", transform: "translate(" + x + " " + y + ")" });
+    m.appendChild(S("circle", { r: 1.45 * U }));
+    var t = S("text", { "font-size": size * U }); t.textContent = text; m.appendChild(t);
+    g.appendChild(m);
+  }
+  function drawItem(it, idx) {
+    var a = anchor(it.e), b = anchor(it.m), d = pathD(a, b);
+    var g = S("g", { "class": "link " + it.cls });
+    var line = S("path", { d: d, "class": "line" });
+    g.appendChild(S("path", { d: d, "class": "hit" }));
+    g.appendChild(line);
+    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    if (it.mark) marker(g, mx, my, it.mark, it.mark === "×" ? 2.4 : 2);
+    if (it.removable) {
+      g.setAttribute("class", g.getAttribute("class") + " removable");
+      g.setAttribute("aria-label", T.removeLink);
+      g.addEventListener("click", function () { removeLink(it.e, it.m); });
+    }
+    if (it.why !== undefined) {
+      g.addEventListener("pointerenter", function () { showWhy(it); });
+      g.addEventListener("pointerleave", function () { showDefault(); });
+    }
+    svg.appendChild(g);
+    if (it.animate) {
+      var len = line.getTotalLength();
+      line.style.strokeDasharray = len; line.style.strokeDashoffset = len;
+      line.getBoundingClientRect();
+      line.style.transition = "stroke-dashoffset .6s ease " + (idx * 0.5) + "s";
+      line.style.strokeDashoffset = 0;
+    }
+  }
+  function drawLinks() {
+    U = unit();
+    svg.replaceChildren();
+    var items = [];
+    if (phase === "play") {
+      items = links.map(function (l) { return { e: l.e, m: l.m, cls: "play", mark: "×", removable: true }; });
+    } else if (phase === "checked" && results) {
+      items = results.items.map(function (r) {
+        return { e: r.e, m: r.m, cls: r.ok ? "ok" : "bad", mark: r.ok ? "✓" : "✗", why: r.why, kind: r.ok ? "ok" : "bad" };
+      }).concat(results.missing.map(function (k) {
+        return { e: k.e, m: k.m, cls: "missing", mark: "?", why: T.missed + " " + L(k.why), kind: "miss" };
+      }));
+    } else if (phase === "fio") {
+      items = links.map(function (l) { return { e: l.e, m: l.m, cls: "dim" }; }).concat(
+        D.answerKey.map(function (k) { return { e: k.e, m: k.m, cls: "fio", animate: animateFio, why: L(k.why), kind: "ok" }; }));
+    }
+    var step = 0;
+    items.forEach(function (it) { drawItem(it, it.animate ? step++ : 0); });
+    animateFio = false;
+  }
+
+  function applyClasses() {
+    var linkedIds = {};
+    links.forEach(function (l) { linkedIds[l.e] = linkedIds[l.m] = true; });
+    for (var id in cardNodes) {
+      var n = cardNodes[id];
+      n.classList.toggle("linked", !!linkedIds[id]);
+      n.classList.toggle("armed", armed === id);
+      n.classList.toggle("hint", !!hint.cards[id]);
+    }
+    for (var g in groupHeads) groupHeads[g].classList.toggle("hint", !!hint.groups[g]);
+    $("app").classList.toggle("locked", phase !== "play");
+  }
+
+  function renderStatus() {
+    var s = $("status"); s.replaceChildren();
+    if (phase === "play") {
+      if (cfg.showTimer) s.appendChild(el("span", "dim mono", "⏱ " + fmtTime(Date.now() - startTime)));
+      s.appendChild(el("span", "dim", T.links(links.length)));
+    } else if (phase === "checked" && results) {
+      var sc = el("span", "score"); sc.appendChild(el("b", null, String(results.score)));
+      sc.appendChild(el("small", null, "/ " + D.answerKey.length + " " + T.points)); s.appendChild(sc);
+      s.appendChild(el("span", "chip ok", T.right(results.correct)));
+      s.appendChild(el("span", "chip bad", T.wrong(results.wrong)));
+      s.appendChild(el("span", "chip miss", T.missing(results.missing.length)));
+    } else if (phase === "fio") {
+      var parts = T.you + " " + fmtTime(endTime - startTime);
+      if (cfg.fioSeconds != null) parts += "   ·   " + T.fioLabel + " " + String(cfg.fioSeconds).replace(".", ",") + " s";
+      s.appendChild(el("span", "dim mono", parts));
+      s.appendChild(el("b", null, T.fioTitle));
+    }
+  }
+  function renderButtons() {
+    var bh = $("btnHint"), bc = $("btnCheck"), left = Math.max(0, cfg.maxHints - hint.used);
+    bh.classList.toggle("hidden", phase !== "play");
+    bh.textContent = T.hint + " (" + left + ")";
+    bh.disabled = left === 0;
+    bc.classList.toggle("hidden", phase === "fio");
+    bc.textContent = phase === "checked" ? T.fio : T.check;
+    bc.disabled = phase === "play" && links.length === 0;
+    $("btnReset").textContent = T.reset;
+  }
+
+  function showDefault() {
+    hoverId = null;
+    info.replaceChildren();
+    var m = el("div", "msg");
+    if (phase === "play") {
+      if (armed) m.textContent = T.armed;
+      else if (hint.msg) { var b = el("b", null, "💡 "); m.appendChild(b); m.appendChild(document.createTextNode(hint.msg)); }
+      else m.textContent = T.instruction;
+    } else if (phase === "checked") m.textContent = T.afterCheck;
+    else if (phase === "fio") m.textContent = T.fioText;
+    info.appendChild(m);
+  }
+  function showCard(id) {
+    var c = cardById[id], a = D.articles[c.article];
+    info.replaceChildren();
+    info.appendChild(thumb(a, "ithumb"));
+    var body = el("div", "ibody");
+    var t = el("div", "ititle mono", c.bmk + "  ·  " + a.title);
+    t.appendChild(el("small", null, c.name + " — " + groupById[c.group].label));
+    body.appendChild(t);
+    var f = el("div", "fields");
+    function row(label, val) { var d = el("div"); d.appendChild(el("span", null, label + ": ")); d.appendChild(document.createTextNode(val)); f.appendChild(d); }
+    row(T.fields.description, a.description);
+    row(T.fields.supplier, a.supplier);
+    row(T.fields.subgroup, a.subgroupNumber + " – " + a.subgroup);
+    row(T.fields.type, a.typeDesignation);
+    body.appendChild(f); info.appendChild(body);
+  }
+  function showWhy(it) {
+    info.replaceChildren();
+    info.appendChild(el("div", "why " + it.kind, cardById[it.e].bmk + "  ↔  " + cardById[it.m].bmk + "   —   " + it.why));
+  }
+
+  function render() { applyClasses(); drawLinks(); renderStatus(); renderButtons(); if (hoverId == null) showDefault(); }
+
+  // ---------- hints ----------
+  function clearHint() { hint.pair = null; hint.level = 0; hint.msg = ""; hint.cards = {}; hint.groups = {}; }
+  function useHint() {
+    if (phase !== "play") return;
+    if (hint.used >= cfg.maxHints) { hint.msg = T.hintNone; render(); return; }
+    var pending = D.answerKey.filter(function (k) { return !hasLink(k.e, k.m); });
+    if (!pending.length) { hint.msg = T.hintDone; render(); return; }
+    var k = hint.pair && pending.indexOf(hint.pair) >= 0 ? hint.pair : pending[0];
+    if (k !== hint.pair) { hint.pair = k; hint.level = 0; }
+    hint.level = Math.min(3, hint.level + 1); hint.used++;
+    var ce = cardById[k.e], cm = cardById[k.m];
+    hint.cards = {}; hint.groups = {};
+    hint.cards[k.e] = true;
+    if (hint.level === 1) hint.msg = T.hint1(ce.bmk, D.articles[cm.article].supplier);
+    if (hint.level === 2) { hint.groups[cm.group] = true; hint.msg = T.hint2(groupById[cm.group].label); }
+    if (hint.level >= 3) { hint.groups[cm.group] = true; hint.cards[k.m] = true; hint.msg = T.hint3; }
+    render();
+  }
+
+  // ---------- game flow ----------
+  function resetPlay() {
+    links = []; results = null; armed = null; clearHint(); hint.used = 0;
+    phase = "play"; startTime = Date.now(); animateFio = false;
+    ghost.replaceChildren(); render();
+  }
+  function startGame() {
+    buildColumns();
+    $("welcome").classList.add("hidden"); hideIdle();
+    lastActivity = Date.now();
+    resetPlay();
+  }
+  function toWelcome() {
+    phase = "welcome"; links = []; results = null; armed = null; clearHint(); hint.used = 0;
+    ghost.replaceChildren(); hideIdle(); $("welcome").classList.remove("hidden");
+  }
+  function check() {
+    endTime = Date.now();
+    var items = links.map(function (l) {
+      var k = keyFor(l.e, l.m);
+      return { e: l.e, m: l.m, ok: !!k, why: k ? L(k.why) : wrongWhy(l) };
+    });
+    var missing = D.answerKey.filter(function (k) { return !hasLink(k.e, k.m); });
+    var correct = items.filter(function (r) { return r.ok; }).length, wrong = items.length - correct, P = cfg.scoring;
+    var score = Math.max(0, correct * P.correct + wrong * P.wrong + hint.used * P.hint);
+    results = { items: items, missing: missing, correct: correct, wrong: wrong, score: score };
+    armed = null; clearHint(); phase = "checked"; render();
+  }
+  function showFio() { phase = "fio"; animateFio = true; render(); }
+
+  // ---------- idle / kiosk ----------
+  function showIdle(secs) {
+    idleShown = true; $("idle").classList.remove("hidden"); $("iCount").textContent = T.idleText(secs);
+  }
+  function hideIdle() { idleShown = false; $("idle").classList.add("hidden"); }
+  function activity() { lastActivity = Date.now(); if (idleShown) hideIdle(); }
+  document.addEventListener("pointerdown", activity, true);
+  document.addEventListener("keydown", activity, true);
+  document.addEventListener("pointermove", function () { if (!idleShown) lastActivity = Date.now(); }, true);
+  setInterval(function () {
+    if (phase === "welcome") return;
+    var idle = (Date.now() - lastActivity) / 1000, total = cfg.idleSeconds + cfg.idleWarnSeconds;
+    if (idle >= total) toWelcome();
+    else if (idle >= cfg.idleSeconds) showIdle(Math.ceil(total - idle));
+    if (phase === "play") renderStatus();
+  }, 500);
+  document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+  document.addEventListener("dragstart", function (e) { e.preventDefault(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "f" || e.key === "F") {
+      if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(function () {});
+    } else if ((e.key === "Enter" || e.key === " ") && phase === "welcome") { e.preventDefault(); startGame(); }
+  });
+
+  // ---------- dragging ----------
+  var drag = null;
+  function cardAt(x, y) { var n = document.elementFromPoint(x, y); return n && n.closest ? n.closest(".card") : null; }
+  function stagePoint(e) { var s = stage.getBoundingClientRect(); return { x: e.clientX - s.left, y: e.clientY - s.top }; }
+  function markDrop(e) {
+    var t = cardAt(e.clientX, e.clientY);
+    for (var id in cardNodes) cardNodes[id].classList.remove("drop");
+    if (t && cardById[t.dataset.id].side !== cardById[drag.from].side) t.classList.add("drop");
+  }
+  stage.addEventListener("pointerdown", function (e) {
+    if (phase !== "play" || e.button !== 0) return;
+    var c = e.target.closest ? e.target.closest(".card") : null;
+    if (!c) return;
+    e.preventDefault();
+    drag = { from: c.dataset.id, sx: e.clientX, sy: e.clientY, moved: false };
+    try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  stage.addEventListener("pointermove", function (e) {
+    if (!drag) {
+      var c = cardAt(e.clientX, e.clientY);
+      var id = c && cardNodes[c.dataset.id] === c ? c.dataset.id : null;
+      if (id !== hoverId && !(phase === "checked" && !id)) { hoverId = id; if (id) showCard(id); else showDefault(); }
+      return;
+    }
+    if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) drag.moved = true;
+    if (!drag.moved) return;
+    var a = anchor(drag.from), p = stagePoint(e);
+    ghost.replaceChildren(S("path", { d: pathD(a, p) }));
+    markDrop(e);
+  });
+  function endDrag(e, cancelled) {
+    if (!drag) return;
+    var d = drag; drag = null; ghost.replaceChildren();
+    for (var id in cardNodes) cardNodes[id].classList.remove("drop");
+    try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
+    if (cancelled) return;
+    var t = cardAt(e.clientX, e.clientY), tid = t ? t.dataset.id : null;
+    if (d.moved) {
+      if (tid && tid !== d.from) {
+        if (cardById[tid].side === cardById[d.from].side) { t.classList.add("shake"); setTimeout(function () { t.classList.remove("shake"); }, 400); }
+        else { addLink(d.from, tid); armed = null; }
+      }
+    } else if (tid) {
+      if (armed && armed !== tid && cardById[armed].side !== cardById[tid].side) { addLink(armed, tid); armed = null; }
+      else armed = armed === tid ? null : tid;
+    }
+    hoverId = null; render();
+  }
+  stage.addEventListener("pointerup", function (e) { endDrag(e, false); });
+  stage.addEventListener("pointercancel", function (e) { endDrag(e, true); });
+
+  // ---------- wiring ----------
+  $("btnStart").addEventListener("click", startGame);
+  $("btnKeep").addEventListener("click", function () { activity(); });
+  $("btnReset").addEventListener("click", resetPlay);
+  $("btnHint").addEventListener("click", useHint);
+  $("btnCheck").addEventListener("click", function () { if (phase === "play") { if (links.length) check(); } else if (phase === "checked") showFio(); });
+  new ResizeObserver(function () { if (phase !== "welcome") drawLinks(); }).observe(stage);
+
+  // static texts
+  $("brandSub").textContent = T.brandSub;
+  $("hE").textContent = "⚡ " + T.electrical;
+  $("hM").textContent = T.mechanical + " ⚙";
+  $("wKicker").textContent = "3D Day";
+  $("wTitle").textContent = T.welcomeTitle;
+  $("wLead").textContent = T.welcomeLead;
+  T.steps.forEach(function (s, i) { var d = el("div", "step"); d.appendChild(el("b", null, String(i + 1))); d.appendChild(document.createTextNode(s)); $("wSteps").appendChild(d); });
+  $("btnStart").textContent = T.start;
+  $("iTitle").textContent = T.idleTitle;
+  $("btnKeep").textContent = T.idleKeep;
+  document.title = "FIO – " + T.welcomeTitle;
+
+  buildColumns(); renderButtons(); showDefault();
+})();
+</script>
+</body>
+</html>
