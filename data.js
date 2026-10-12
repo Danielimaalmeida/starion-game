@@ -1,45 +1,45 @@
 /*
- * FIO – Find the relations: game content.
+ * FIO – Build the structure: game content.
  *
  * Edit this file to swap in real data; index.html does not need to change.
  * ALL CONTENT BELOW IS ILLUSTRATIVE (fictional article codes).
  *
- * Model:  group (functional unit)  >  card (BMK)  >  article (physical part).
+ * The game has 3 steps:
+ *   1. build the ELECTRICAL tree   (station > functional unit > BMK)
+ *   2. build the MECHANICAL tree   (same levels)
+ *   3. link electrical <-> mechanical BMKs that are the same article
+ *
+ * Model:
  *  - articles : the physical parts. Only they have a photo (img/<image>.png).
- *  - groups   : functional units, shown as headings on each side.
- *  - cards    : BMKs. Each points to a group and to an article.
- *  - answerKey: the hidden solution. Each entry is a correct link
- *               electrical card <-> mechanical card. A card may appear in
- *               several entries (one-to-many). A card that appears in no
- *               entry has no partner: linking it is always wrong.
+ *  - nodes    : the pieces of both trees. kind is "station" | "fu" | "bmk".
+ *               `parent` is the node it must hang under (null for the station),
+ *               and is the hidden solution of steps 1 and 2.
+ *               BMK nodes point to an article (that is where the photo comes from).
+ *  - answerKey: the hidden solution of step 3: pairs of BMKs (electrical e,
+ *               mechanical m). A BMK may appear in several pairs (one-to-many).
+ *               A BMK that appears in no pair has no partner: linking it is wrong.
  *
  * Text that is shown to the player may be a string or { pt: "...", en: "..." }.
  */
 window.FIO_DATA = {
 
   config: {
-    lang: "pt",              // "pt" | "en"   (also ?lang=en in the URL)
-    imageDir: "img/",        // folder with the sticker PNGs
+    lang: "pt",               // "pt" | "en"   (also ?lang=en in the URL)
+    imageDir: "img/",         // folder with the sticker PNGs
     imageExt: ".png",
-    shuffle: true,           // shuffle card order inside each group on every game
-    hidePhotos: "mechanical", // "none" | "electrical" | "mechanical": that side shows "?" until hover; all revealed after Check
+    drift: true,              // unlinked pieces float slowly around (they stop on hover / drag / once linked)
+    driftSpeed: 2,            // slow = 1, default = 2, lively = 4
+    shuffle: true,            // shuffle card order inside each group in step 3
+    hidePhotos: "none",       // step 3 only: "none" | "electrical" | "mechanical" (shows "?" until hover)
     showTimer: true,
-    maxHints: 3,
-    idleSeconds: 60,         // no input for this long -> back to the welcome screen
-    idleWarnSeconds: 10,     // countdown shown before the automatic restart
-    scoring: { correct: 1, wrong: -1, hint: -1 },   // floor is 0
+    maxHints: 3,              // per step
+    idleSeconds: 60,          // no input for this long -> back to the welcome screen
+    idleWarnSeconds: 10,      // countdown shown before the automatic restart
+    scoring: { correct: 1, wrong: -1, hint: -1 },   // per step; a step never goes below 0
     // Time (seconds) shown for the FIO in "You vs. FIO". null = do not show a
     // number. Only set this to a value you have actually measured.
     fioSeconds: null
   },
-
-  groups: [
-    { id: "g-cc01", side: "electrical", label: "CC01 · Cabinet: Control" },
-    { id: "g-fd01", side: "electrical", label: "FD01 · Field devices" },
-    { id: "g-cl01", side: "mechanical", label: "CL01 · Clamping" },
-    { id: "g-cv01", side: "mechanical", label: "CV01 · Conveyor" },
-    { id: "g-ir01", side: "mechanical", label: "IR01 · Industrial robot" }
-  ],
 
   articles: {
     "IFM.IGS208": {
@@ -56,11 +56,6 @@ window.FIO_DATA = {
       title: "FESTO.VUVG-L10", description: "5/2-way solenoid valve, 24 V DC",
       subgroupNumber: "330", subgroup: "Directional valves",
       supplier: "Festo", typeDesignation: "VUVG-L10-M52", image: "valvula_festo"
-    },
-    "FESTO.SPAN-P10R": {
-      title: "FESTO.SPAN-P10R", description: "Pressure sensor, 0 to 10 bar, PNP",
-      subgroupNumber: "335", subgroup: "Pressure sensors",
-      supplier: "Festo", typeDesignation: "SPAN-P10R", image: "sensor_pressao_festo"
     },
     "SEW.R37DRN71M4": {
       title: "SEW.R37DRN71M4", description: "Helical geared motor, 0.37 kW, 4-pole",
@@ -82,80 +77,45 @@ window.FIO_DATA = {
       subgroupNumber: "110", subgroup: "PLC CPUs",
       supplier: "SIEMENS", typeDesignation: "6ES7511-1AK02-0AB0", image: "plc_siemens"
     },
-    "WAGO.2004-1392": {
-      title: "WAGO.2004-1392", description: "Through terminal block, 4 mm²",
-      subgroupNumber: "261", subgroup: "Terminal blocks",
-      supplier: "WAGO", typeDesignation: "2004-1392", image: "regua_terminais_10p"
-    },
-    "LAPP.1119305": {
-      title: "LAPP.1119305", description: "Control cable, 7 x 1.5 mm², shielded",
-      subgroupNumber: "150", subgroup: "Control cables",
-      supplier: "LAPP", typeDesignation: "1119305", image: "cabo_lapp"
-    },
-    "ITEM.PROFIL-40": {
-      title: "ITEM.PROFIL-40", description: "Aluminium profile 40 x 40, slot 8",
-      subgroupNumber: "520", subgroup: "Aluminium profiles",
-      supplier: "Item", typeDesignation: "Profile 40x40", image: "perfil_aluminio"
-    },
     "INTERROLL.RE-50": {
       title: "INTERROLL.RE-50", description: "Conveyor roller, Ø 50 mm, steel",
       subgroupNumber: "530", subgroup: "Conveyor rollers",
       supplier: "Interroll", typeDesignation: "RE-50", image: "rolos_transportador"
-    },
-    "FIBRO.2431-12": {
-      title: "FIBRO.2431-12", description: "Compression spring, Ø 12 mm",
-      subgroupNumber: "560", subgroup: "Springs",
-      supplier: "Fibro", typeDesignation: "2431-12", image: "mola_helicoidal"
     }
   },
 
-  cards: [
-    // ---- electrical ------------------------------------------------------
-    { id: "e-A1",   side: "electrical", group: "g-cc01", bmk: "-A1",  name: "PLC",
-      article: "SIE.6ES7511",
-      note: { pt: "O PLC só existe do lado elétrico: não tem par mecânico.",
-              en: "The PLC only exists on the electrical side: it has no mechanical partner." } },
-    { id: "e-XD01", side: "electrical", group: "g-cc01", bmk: "XD01", name: "Terminal strip",
-      article: "WAGO.2004-1392",
-      note: { pt: "Terminais só existem no elétrico.", en: "Terminals only exist on the electrical side." } },
-    { id: "e-UR01", side: "electrical", group: "g-cc01", bmk: "UR01", name: "Robot controller",
-      article: "KUKA.KRC4" },
-    { id: "e-W1",   side: "electrical", group: "g-cc01", bmk: "-W1",  name: "Cable",
-      article: "LAPP.1119305",
-      note: { pt: "Cabos só existem no elétrico.", en: "Cables only exist on the electrical side." } },
-    { id: "e-B1",   side: "electrical", group: "g-fd01", bmk: "-B1",  name: "Inductive sensor",
-      article: "IFM.IGS208" },
-    { id: "e-B3",   side: "electrical", group: "g-fd01", bmk: "-B3",  name: "Inductive sensor",
-      article: "IFM.II0297",
+  nodes: [
+    // ================= electrical tree =================
+    { id: "e-ST01", side: "electrical", kind: "station", code: "ST01", name: "Station", parent: null },
+
+    { id: "e-FD01", side: "electrical", kind: "fu", code: "FD01", name: "Field devices", parent: "e-ST01" },
+    { id: "e-B1",   side: "electrical", kind: "bmk", code: "-B1", name: "Inductive sensor", parent: "e-FD01", article: "IFM.IGS208" },
+    { id: "e-B3",   side: "electrical", kind: "bmk", code: "-B3", name: "Inductive sensor", parent: "e-FD01", article: "IFM.II0297",
       note: { pt: "Mesmo supplier (IFM) que o Proximity Switch, mas é outro article: este não tem par.",
               en: "Same supplier (IFM) as the Proximity Switch, but a different article: this one has no partner." } },
-    { id: "e-Y1",   side: "electrical", group: "g-fd01", bmk: "-Y1",  name: "Solenoid valve",
-      article: "FESTO.VUVG-L10" },
-    { id: "e-M1",   side: "electrical", group: "g-fd01", bmk: "-M1",  name: "Motor",
-      article: "SEW.R37DRN71M4" },
+    { id: "e-Y1",   side: "electrical", kind: "bmk", code: "-Y1", name: "Solenoid valve",   parent: "e-FD01", article: "FESTO.VUVG-L10" },
+    { id: "e-M1",   side: "electrical", kind: "bmk", code: "-M1", name: "Motor",            parent: "e-FD01", article: "SEW.R37DRN71M4" },
 
-    // ---- mechanical ------------------------------------------------------
-    { id: "m-SW01", side: "mechanical", group: "g-cl01", bmk: "SW01", name: "Proximity Switch",
-      article: "IFM.IGS208" },
-    { id: "m-VA01", side: "mechanical", group: "g-cl01", bmk: "VA01", name: "Directional Valve",
-      article: "FESTO.VUVG-L10" },
-    { id: "m-PS01", side: "mechanical", group: "g-cl01", bmk: "PS01", name: "Pressure sensor",
-      article: "FESTO.SPAN-P10R",
-      note: { pt: "Também é Festo, mas é um sensor de pressão, não a válvula, e não tem par elétrico.",
-              en: "Also Festo, but it is a pressure sensor, not the valve, and it has no electrical partner." } },
-    { id: "m-MO01", side: "mechanical", group: "g-cv01", bmk: "MO01", name: "Geared Motor",
-      article: "SEW.R37DRN71M4" },
-    { id: "m-RO01", side: "mechanical", group: "g-cv01", bmk: "RO01", name: "Rollers",
-      article: "INTERROLL.RE-50",
+    { id: "e-CC01", side: "electrical", kind: "fu", code: "CC01", name: "Control cabinet", parent: "e-ST01" },
+    { id: "e-A1",   side: "electrical", kind: "bmk", code: "-A1",  name: "PLC",              parent: "e-CC01", article: "SIE.6ES7511",
+      note: { pt: "O PLC só existe do lado elétrico: não tem par mecânico.",
+              en: "The PLC only exists on the electrical side: it has no mechanical partner." } },
+    { id: "e-UR01", side: "electrical", kind: "bmk", code: "UR01", name: "Robot controller", parent: "e-CC01", article: "KUKA.KRC4" },
+
+    // ================= mechanical tree =================
+    { id: "m-ST01", side: "mechanical", kind: "station", code: "ST01", name: "Station", parent: null },
+
+    { id: "m-CL01", side: "mechanical", kind: "fu", code: "CL01", name: "Clamping", parent: "m-ST01" },
+    { id: "m-SW01", side: "mechanical", kind: "bmk", code: "SW01", name: "Proximity Switch",  parent: "m-CL01", article: "IFM.IGS208" },
+    { id: "m-VA01", side: "mechanical", kind: "bmk", code: "VA01", name: "Directional Valve", parent: "m-CL01", article: "FESTO.VUVG-L10" },
+
+    { id: "m-CV01", side: "mechanical", kind: "fu", code: "CV01", name: "Conveyor", parent: "m-ST01" },
+    { id: "m-MO01", side: "mechanical", kind: "bmk", code: "MO01", name: "Geared Motor", parent: "m-CV01", article: "SEW.R37DRN71M4" },
+    { id: "m-RO01", side: "mechanical", kind: "bmk", code: "RO01", name: "Rollers",      parent: "m-CV01", article: "INTERROLL.RE-50",
       note: { pt: "Rolos só existem no mecânico.", en: "Rollers only exist on the mechanical side." } },
-    { id: "m-AP01", side: "mechanical", group: "g-cv01", bmk: "AP01", name: "Aluminium profile",
-      article: "ITEM.PROFIL-40",
-      note: { pt: "Perfis só existem no mecânico.", en: "Profiles only exist on the mechanical side." } },
-    { id: "m-SP01", side: "mechanical", group: "g-cv01", bmk: "SP01", name: "Spring",
-      article: "FIBRO.2431-12",
-      note: { pt: "Molas só existem no mecânico.", en: "Springs only exist on the mechanical side." } },
-    { id: "m-RB01", side: "mechanical", group: "g-ir01", bmk: "RB01", name: "6-Axis Robot",
-      article: "KUKA.KR6-R900" }
+
+    { id: "m-IR01", side: "mechanical", kind: "fu", code: "IR01", name: "Industrial robot", parent: "m-ST01" },
+    { id: "m-RB01", side: "mechanical", kind: "bmk", code: "RB01", name: "6-Axis Robot", parent: "m-IR01", article: "KUKA.KR6-R900" }
   ],
 
   answerKey: [
@@ -173,83 +133,119 @@ window.FIO_DATA = {
   ui: {
     pt: {
       brandSub: "Factory Information Organizer",
-      welcomeTitle: "Encontra as relações",
-      welcomeLead: "O FIO liga automaticamente a estrutura elétrica (ePlan) à estrutura mecânica (BOM). Consegues fazer o mesmo?",
+      welcomeTitle: "Monta a estrutura da fábrica",
+      welcomeLead: "O FIO organiza e liga automaticamente a estrutura elétrica (ePlan) e a mecânica (BOM). Consegues fazer o mesmo?",
       steps: [
-        "Arrasta de um elemento elétrico até ao mecânico que usa o mesmo article.",
-        "Faz as ligações que quiseres. Apaga uma com × ou recomeça quando quiseres.",
-        "Carrega em Verificar e vê a tua pontuação."
+        "Monta a estrutura elétrica: puxa o ponto ＋ de uma peça até outra para as ligar.",
+        "Faz o mesmo para a estrutura mecânica.",
+        "Liga o que é o mesmo article entre as duas estruturas."
       ],
       start: "Começar",
+      stepNames: ["Elétrico", "Mecânico", "Relações"],
       electrical: "Elétrico (ePlan)",
       mechanical: "Mecânico (BOM)",
       sideWord: { electrical: "elétrico", mechanical: "mecânico" },
-      instruction: "Arrasta de um cartão até ao seu par do outro lado (ou clica num e depois no outro). Passa o rato num cartão para ver o article.",
-      armed: "Agora clica no cartão do outro lado.",
-      hint: "Dica", check: "Verificar", fio: "Tu vs. FIO", reset: "Recomeçar",
+      kindWord: { station: "estação", fu: "functional unit", bmk: "BMK" },
+      kindInfo: {
+        station: "Estação: a raiz da árvore. Agrupa as functional units.",
+        fu: "Functional unit: agrupa os BMKs por função.",
+        bmk: "BMK: objeto identificado por um código. Tem um article (a peça física)."
+      },
+      intro: [
+        "Monta a estrutura ELÉTRICA: puxa o ponto ＋ de uma peça até outra para as ligar (estação → functional unit → BMK).",
+        "Agora a estrutura MECÂNICA: puxa o ponto ＋ de uma peça até outra (estação → functional unit → BMK).",
+        "Liga cada elemento elétrico ao mecânico que usa o mesmo article: arrasta de um cartão até ao outro lado."
+      ],
+      armed: "Agora clica na peça a ligar.",
+      hint: "Dica", check: "Verificar", next: "Continuar", fio: "Tu vs. FIO",
+      clear: "Limpar", reset: "Recomeçar", resetSure: "Recomeçar tudo?",
       links: n => n + (n === 1 ? " ligação" : " ligações"),
-      points: "Pontos",
+      points: "pontos",
+      total: "Total",
       right: n => "✓ " + n + (n === 1 ? " certa" : " certas"),
       wrong: n => "✗ " + n + (n === 1 ? " errada" : " erradas"),
       missing: n => "? " + n + " em falta",
-      afterCheck: "Passa o rato por cada ligação para veres o porquê. A tracejado estão os pares que faltaram.",
+      afterCheck: "Passa o rato por cada ligação para veres o porquê. A ponteado estão as que faltaram.",
       removeLink: "Apagar ligação",
       idleTitle: "Ainda estás aí?",
       idleText: s => "O jogo recomeça em " + s + " s.",
       idleKeep: "Continuar",
+      hintB1: (c, k) => "O nível acima de " + c + " é: " + k + ".",
+      hintB2: p => "Procura " + p + ".",
+      hintB3: "Liga as duas peças que estão a brilhar.",
       hint1: (bmk, sup) => "Procura o par de " + bmk + ": o article do outro lado é do supplier " + sup + ".",
       hint2: g => "Está no grupo " + g + ".",
       hint3: "É o cartão que está a brilhar.",
       hintNone: "Já usaste todas as dicas.",
-      hintDone: "Já não há pares por descobrir.",
+      hintDone: "Já não há nada por descobrir.",
       fields: { description: "Standard Description", subgroup: "Subgroup", supplier: "Supplier Name", type: "Type Designation" },
       fioTitle: "Isto o FIO faz sozinho",
-      fioText: "O FIO lê os exports do ePlan e dos BOM e encontra estas relações automaticamente.",
+      fioText: "O FIO lê os exports do ePlan e dos BOM, organiza as estruturas e encontra estas relações automaticamente.",
       you: "Tu", fioLabel: "FIO",
+      sameLevel: "Peças do mesmo nível não se ligam entre si.",
+      belongs: (c, p) => c + " pertence a " + p + ".",
       noPair: (bmk, side) => bmk + " só existe do lado " + side + ": não tem par.",
       wrongPair: "Não é o mesmo article.",
       sameSupplier: "O supplier é o mesmo, mas o article é outro.",
-      missed: "Par em falta."
+      missed: "Faltou esta ligação."
     },
     en: {
       brandSub: "Factory Information Organizer",
-      welcomeTitle: "Find the relations",
-      welcomeLead: "The FIO automatically links the electrical structure (ePlan) to the mechanical structure (BOM). Can you do the same?",
+      welcomeTitle: "Build the factory structure",
+      welcomeLead: "The FIO organises and links the electrical (ePlan) and mechanical (BOM) structures automatically. Can you do the same?",
       steps: [
-        "Drag from an electrical element to the mechanical one that uses the same article.",
-        "Make as many links as you like. Remove one with × or restart at any time.",
-        "Press Check to see your score."
+        "Build the electrical structure: pull the ＋ dot of a piece to another to link them.",
+        "Do the same for the mechanical structure.",
+        "Link what is the same article across the two structures."
       ],
       start: "Start",
+      stepNames: ["Electrical", "Mechanical", "Relations"],
       electrical: "Electrical (ePlan)",
       mechanical: "Mechanical (BOM)",
       sideWord: { electrical: "electrical", mechanical: "mechanical" },
-      instruction: "Drag from a card to its partner on the other side (or click one, then the other). Hover a card to see its article.",
-      armed: "Now click the card on the other side.",
-      hint: "Hint", check: "Check", fio: "You vs. FIO", reset: "Restart",
+      kindWord: { station: "station", fu: "functional unit", bmk: "BMK" },
+      kindInfo: {
+        station: "Station: the root of the tree. It groups functional units.",
+        fu: "Functional unit: groups BMKs by function.",
+        bmk: "BMK: an object identified by a code. It has an article (the physical part)."
+      },
+      intro: [
+        "Build the ELECTRICAL structure: pull the ＋ dot of a piece to another to link them (station → functional unit → BMK).",
+        "Now the MECHANICAL structure: pull the ＋ dot of a piece to another (station → functional unit → BMK).",
+        "Link each electrical element to the mechanical one that uses the same article: drag from one card to the other side."
+      ],
+      armed: "Now click the piece to link it to.",
+      hint: "Hint", check: "Check", next: "Continue", fio: "You vs. FIO",
+      clear: "Clear", reset: "Restart", resetSure: "Restart everything?",
       links: n => n + (n === 1 ? " link" : " links"),
-      points: "Points",
+      points: "points",
+      total: "Total",
       right: n => "✓ " + n + " correct",
       wrong: n => "✗ " + n + " wrong",
       missing: n => "? " + n + " missing",
-      afterCheck: "Hover each link to see why. Dashed lines are the pairs you missed.",
+      afterCheck: "Hover each link to see why. Dotted lines are the ones you missed.",
       removeLink: "Remove link",
       idleTitle: "Still there?",
       idleText: s => "The game restarts in " + s + " s.",
       idleKeep: "Keep playing",
+      hintB1: (c, k) => "The level above " + c + " is: " + k + ".",
+      hintB2: p => "Look for " + p + ".",
+      hintB3: "Link the two glowing pieces.",
       hint1: (bmk, sup) => "Look for the partner of " + bmk + ": the article on the other side is from supplier " + sup + ".",
       hint2: g => "It is in group " + g + ".",
       hint3: "It is the glowing card.",
       hintNone: "You have used all your hints.",
-      hintDone: "There are no pairs left to find.",
+      hintDone: "There is nothing left to find.",
       fields: { description: "Standard Description", subgroup: "Subgroup", supplier: "Supplier Name", type: "Type Designation" },
       fioTitle: "The FIO does this on its own",
-      fioText: "The FIO reads the ePlan and BOM exports and finds these relations automatically.",
+      fioText: "The FIO reads the ePlan and BOM exports, organises the structures and finds these relations automatically.",
       you: "You", fioLabel: "FIO",
+      sameLevel: "Pieces on the same level are not linked to each other.",
+      belongs: (c, p) => c + " belongs to " + p + ".",
       noPair: (bmk, side) => bmk + " only exists on the " + side + " side: it has no partner.",
       wrongPair: "Not the same article.",
       sameSupplier: "Same supplier, but a different article.",
-      missed: "Missing pair."
+      missed: "This link was missing."
     }
   }
 };
