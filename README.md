@@ -33,9 +33,10 @@ Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` 
 - Apagar uma ligação: clicar no `×` a meio do fio. `Limpar` apaga as do passo atual.
 - `Dica`: até 3 por passo, progressivas. Cada uma custa um ponto.
 - `Verificar`: fios certos com ✓ verde, errados a vermelho ✗, em falta a ponteado ?.
-  Nos passos 1 e 3, os fios certos ganham corrente elétrica: um clarão percorre-os um a um
-  e depois fica uma corrente contínua (`config.currentOnLink: true` mostra-a logo ao
-  ligar, mas revela as respostas). Passar o rato por um fio explica porquê.
+  Passar o rato por um fio explica porquê.
+- Pista: nos passos 1 e 3, quando fazes uma ligação certa, um clarão amarelo percorre o fio
+  e fica uma corrente elétrica contínua. A pontuação só conta ao Verificar.
+  Para esconder a pista até ao Verificar: `config.currentOnLink: false`.
   `Continuar` passa ao passo seguinte.
 - `Recomeçar` volta ao passo 1. Se já houver progresso, pede um segundo clique.
 - Sem interação durante 60 s: aviso de 10 s e volta ao ecrã inicial.
