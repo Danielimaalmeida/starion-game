@@ -32,6 +32,7 @@ window.FIO_DATA = {
     lang: "pt",               // "pt" | "en"   (also ?lang=en in the URL)
     imageDir: "img/",         // folder with the sticker PNGs
     imageExt: ".png",
+    scale: 0.8,               // size of the floating pieces in steps 1 and 2 (1 = original, 0.8 = 20% smaller)
     drift: true,              // unlinked pieces float slowly around (they stop on hover / drag / once linked)
     driftSpeed: 2,            // slow = 1, default = 2, lively = 4
     shuffle: true,            // shuffle card order inside each group in step 3

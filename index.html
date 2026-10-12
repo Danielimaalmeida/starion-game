@@ -55,6 +55,7 @@
   .btn.hidden { display: none; }
 
   /* ---------- stage ---------- */
+  #stage.mode-build { --u: calc(min(1vh, 0.5625vw) * var(--scale, 1)); }   /* config.scale shrinks the floating pieces (steps 1 and 2) */
   #stage { position: relative; min-height: 0; overflow: hidden; touch-action: none;
            background: radial-gradient(circle at 50% 40%, #fff, var(--bg) 75%); }
   #field, #cols { position: absolute; inset: 0; display: none; }
@@ -231,6 +232,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var stage = $("stage"), field = $("field"), svg = $("links"), marks = $("marks"), ghost = $("ghost"), info = $("info");
   var NS = "http://www.w3.org/2000/svg";
+  if (cfg.scale) stage.style.setProperty("--scale", cfg.scale);
   var STEPS = [{ type: "build", side: "electrical" }, { type: "build", side: "mechanical" }, { type: "relate" }];
 
   var nodeById = {}, depth = {};
@@ -266,7 +268,7 @@
   function unit() {
     var p = document.createElement("div");
     p.style.cssText = "position:absolute;visibility:hidden;width:calc(var(--u) * 1)";
-    document.body.appendChild(p); var w = p.getBoundingClientRect().width; p.remove(); return w || 10;
+    stage.appendChild(p); var w = p.getBoundingClientRect().width; p.remove(); return w || 10;
   }
   function placeholder(name) {
     name = String(name).split("/").pop();

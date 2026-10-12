@@ -50,7 +50,7 @@ a árvore mecânica e os BMKs `-Q1`, `-X1`, `-M1` são ilustrativos.
   aparecem como etiqueta.
 - `answerKey`: o gabarito do passo 3, pares `e` (elétrico) ↔ `m` (mecânico). Uma peça
   pode ter vários pares. Uma peça com foto fora do gabarito não tem par: ligá-la é erro.
-- `config`: pontuação, dicas, deriva das peças (`drift`, `driftSpeed`), tempos de
+- `config`: pontuação, dicas, tamanho das peças nos passos 1 e 2 (`scale`, 0.8 = 20% mais pequenas), deriva (`drift`, `driftSpeed`), tempos de
   inatividade, cronómetro, `hidePhotos` (passo 3: esconde as fotos de um lado até
   passar o rato).
 
