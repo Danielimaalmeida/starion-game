@@ -24,7 +24,7 @@ Tecla `F` alterna ecrã inteiro. Idioma: botões **Português / English** no ecr
 ## Fluxo
 
 1. Ecrã inicial (volta-se aqui ao fim de 60 s sem interação).
-2. "Como funciona": o desafio de negócio (a mesma estação no ePlan e na BOM), os níveis
+2. "Como funciona": o desafio de negócio (a mesma estação no ePlan e, na mecânica, nas BOMs e no Layout file), os níveis
    da árvore com um exemplo fictício (`rulesExample` em `data.js`, para não dar respostas)
    e as regras. O cronómetro só começa ao fechar este ecrã.
 3. Passo 1, depois um cartão curto antes dos passos 2 e 3 a explicar o que muda.

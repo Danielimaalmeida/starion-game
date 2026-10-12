@@ -102,7 +102,7 @@ window.FIO_DATA = {
       article: "SEW.R37DRN71M4" },
 
     // ================= mechanical tree =================
-    // Robot branch, as the BOM sees it: LE002 (robot cell) > LE002.1 robot > LE002.1.1 gripper
+    // Robot branch, as the mechanical side (BOMs + Layout file) sees it: LE002 (robot cell) > LE002.1 robot > LE002.1.1 gripper
     // (mounted on the robot, unlike the electrical tree), plus LE002.2 pedestal, which the
     // electrical side does not have. Codes illustrative; photos are mirrored copies in img/variant/.
     { id: "m-ST001",     side: "mechanical", kind: "station", code: "ST001", name: "Station", parent: null },
@@ -158,7 +158,7 @@ window.FIO_DATA = {
       toFindLong: n => "Neste passo há " + n + (n === 1 ? " relação certa." : " relações certas."),
       brandSub: "Factory Information Organizer",
       welcomeTitle: "Monta a estrutura da fábrica",
-      welcomeLead: "O FIO organiza e liga automaticamente a estrutura elétrica (ePlan) e a mecânica (BOM). Consegues fazer o mesmo?",
+      welcomeLead: "O FIO organiza e liga automaticamente a estrutura elétrica (ePlan) e a mecânica (BOMs e Layout file). Consegues fazer o mesmo?",
       steps: [
         "Monta a estrutura elétrica: puxa o ponto ＋ de uma peça até outra para as ligar, de cima para baixo.",
         "Faz o mesmo para a estrutura mecânica.",
@@ -168,7 +168,7 @@ window.FIO_DATA = {
       rulesKicker: "Antes de começar",
       rulesTitle: "Como funciona",
       problemTitle: "O desafio",
-      problem: "Numa fábrica de automóveis, cada estação da linha é descrita duas vezes: pela engenharia elétrica, no ePlan, e pela engenharia mecânica, na lista de materiais (BOM). São as mesmas peças, em listas diferentes e com códigos diferentes. O FIO junta as duas estruturas e encontra sozinho o que corresponde a quê.",
+      problem: "Numa fábrica de automóveis, cada estação da linha é descrita duas vezes: pela engenharia elétrica, no ePlan, e pela engenharia mecânica, nas listas de materiais (BOMs) e no Layout file, que diz onde está cada conjunto na estação. São as mesmas peças, em ficheiros diferentes e com códigos diferentes. O FIO junta as duas estruturas e encontra sozinho o que corresponde a quê.",
       levelsTitle: "Cada estrutura é uma árvore com níveis",
       levels: {
         station: ["Estação", "a zona da linha"],
@@ -187,19 +187,19 @@ window.FIO_DATA = {
         ["✓", "No fim de cada passo, carrega em Verificar: +1 por ligação certa, −1 por errada."]
       ],
       stepsTitle: "3 passos",
-      stepsShort: ["Elétrico (ePlan): monta a árvore.", "Mecânico (BOM): monta a árvore.", "Relações: liga o que é a mesma peça nos dois lados."],
+      stepsShort: ["Elétrico (ePlan): monta a árvore.", "Mecânico (BOMs + Layout file): monta a árvore.", "Relações: liga o que é a mesma peça nos dois lados."],
       rulesGo: "Começar o passo 1",
       rulesBack: "Voltar ao jogo",
       help: "Como funciona",
       stepIntro: [
         null,
-        { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica (BOM). Os códigos são outros, e a árvore também: conjunto → subconjunto → peças. Monta-a. Ligação certa? As engrenagens começam a rodar." },
+        { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica: as BOMs dizem que peças compõem cada conjunto e o Layout file onde cada conjunto está na estação. Os códigos são outros, e a árvore também: conjunto → subconjunto → peças. Monta-a. Ligação certa? As engrenagens começam a rodar." },
         { title: "Passo 3 · Relações", text: "Agora, o que o FIO faz sozinho: encontrar o que é a mesma peça nos dois lados. Liga cada cartão elétrico (laranja) ao mecânico (roxo) que lhe corresponde. A etiqueta do supplier ajuda, mas há iscos com o mesmo supplier, e nem tudo tem par." }
       ],
       introGo: "Vamos lá",
       stepNames: ["Elétrico", "Mecânico", "Relações"],
       electrical: "Elétrico (ePlan)",
-      mechanical: "Mecânico (BOM)",
+      mechanical: "Mecânico (BOM + Layout)",
       sideWord: { electrical: "elétrico", mechanical: "mecânico" },
       kindWord: { station: "estação", fu: "functional unit", bmk: "BMK", article: "article" },
       kindInfo: {
@@ -237,7 +237,7 @@ window.FIO_DATA = {
       hintDone: "Já não há nada por descobrir.",
       fields: { description: "Standard Description", subgroup: "Subgroup", supplier: "Supplier Name", type: "Type Designation" },
       fioTitle: "Isto o FIO faz sozinho",
-      fioText: "O FIO lê os exports do ePlan e dos BOM, organiza as estruturas e encontra estas relações automaticamente.",
+      fioText: "O FIO lê os exports do ePlan, das BOMs e do Layout file, organiza as estruturas e encontra estas relações automaticamente.",
       you: "Tu", fioLabel: "FIO",
       belongs: (c, p) => c + " pertence a " + p + ".",
       noPair: (bmk, side) => bmk + " só existe do lado " + side + ": não tem par.",
@@ -251,7 +251,7 @@ window.FIO_DATA = {
       toFindLong: n => "There " + (n === 1 ? "is 1 correct relation" : "are " + n + " correct relations") + " in this step.",
       brandSub: "Factory Information Organizer",
       welcomeTitle: "Build the factory structure",
-      welcomeLead: "The FIO organises and links the electrical (ePlan) and mechanical (BOM) structures automatically. Can you do the same?",
+      welcomeLead: "The FIO organises and links the electrical (ePlan) and mechanical (BOMs and Layout file) structures automatically. Can you do the same?",
       steps: [
         "Build the electrical structure: pull the ＋ dot of a piece to another to link them, top to bottom.",
         "Do the same for the mechanical structure.",
@@ -261,7 +261,7 @@ window.FIO_DATA = {
       rulesKicker: "Before you start",
       rulesTitle: "How it works",
       problemTitle: "The challenge",
-      problem: "In a car factory, every station on the line is described twice: by electrical engineering, in ePlan, and by mechanical engineering, in the bill of materials (BOM). They are the same parts, in different lists and with different codes. The FIO brings both structures together and works out on its own what matches what.",
+      problem: "In a car factory, every station on the line is described twice: by electrical engineering, in ePlan, and by mechanical engineering, in the bills of materials (BOMs) and the Layout file, which says where each assembly sits in the station. They are the same parts, in different files and with different codes. The FIO brings both structures together and works out on its own what matches what.",
       levelsTitle: "Each structure is a tree with levels",
       levels: {
         station: ["Station", "the area of the line"],
@@ -280,19 +280,19 @@ window.FIO_DATA = {
         ["✓", "At the end of each step, press Check: +1 per correct link, −1 per wrong one."]
       ],
       stepsTitle: "3 steps",
-      stepsShort: ["Electrical (ePlan): build the tree.", "Mechanical (BOM): build the tree.", "Relations: link what is the same part on both sides."],
+      stepsShort: ["Electrical (ePlan): build the tree.", "Mechanical (BOMs + Layout file): build the tree.", "Relations: link what is the same part on both sides."],
       rulesGo: "Start step 1",
       rulesBack: "Back to the game",
       help: "How it works",
       stepIntro: [
         null,
-        { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it (BOM). Different codes, and a different tree: assembly → sub-assembly → parts. Build it. Right link? The gears start turning." },
+        { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it: the BOMs say which parts make up each assembly, and the Layout file where each assembly sits in the station. Different codes, and a different tree: assembly → sub-assembly → parts. Build it. Right link? The gears start turning." },
         { title: "Step 3 · Relations", text: "Now what the FIO does on its own: find what is the same part on both sides. Link each electrical card (orange) to the mechanical card (purple) that matches it. The supplier tag helps, but some decoys share the supplier, and not everything has a partner." }
       ],
       introGo: "Let's go",
       stepNames: ["Electrical", "Mechanical", "Relations"],
       electrical: "Electrical (ePlan)",
-      mechanical: "Mechanical (BOM)",
+      mechanical: "Mechanical (BOM + Layout)",
       sideWord: { electrical: "electrical", mechanical: "mechanical" },
       kindWord: { station: "station", fu: "functional unit", bmk: "BMK", article: "article" },
       kindInfo: {
@@ -330,7 +330,7 @@ window.FIO_DATA = {
       hintDone: "There is nothing left to find.",
       fields: { description: "Standard Description", subgroup: "Subgroup", supplier: "Supplier Name", type: "Type Designation" },
       fioTitle: "The FIO does this on its own",
-      fioText: "The FIO reads the ePlan and BOM exports, organises the structures and finds these relations automatically.",
+      fioText: "The FIO reads the ePlan, BOM and Layout file exports, organises the structures and finds these relations automatically.",
       you: "You", fioLabel: "FIO",
       belongs: (c, p) => c + " belongs to " + p + ".",
       noPair: (bmk, side) => bmk + " only exists on the " + side + " side: it has no partner.",
