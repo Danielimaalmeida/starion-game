@@ -102,32 +102,31 @@ window.FIO_DATA = {
       article: "SEW.R37DRN71M4" },
 
     // ================= mechanical tree =================
-    // Robot branch, as the mechanical side (BOMs + Layout file) sees it: LE002 (robot cell) > LE002.1 robot > LE002.1.1 gripper
-    // (mounted on the robot, unlike the electrical tree), plus LE002.2 pedestal, which the
-    // electrical side does not have. Codes illustrative; photos are mirrored copies in img/variant/.
-    { id: "m-ST001",     side: "mechanical", kind: "station", code: "ST001", name: "Station", parent: null },
-    { id: "m-LE002",     side: "mechanical", kind: "fu", code: "LE002", name: "Robot cell", parent: "m-ST001" },
-    { id: "m-LE002.1",   side: "mechanical", kind: "bmk", code: "LE002.1", name: "Robot, mechanical unit", parent: "m-LE002",
+    // The mechanical side has no stations: layout elements (LE…, from the Layout file) are
+    // the roots, and BOM positions hang below them with codes that extend the parent's
+    // (LE002 > LE002.1 > LE002.1.1). Robot branch: the gripper hangs under the robot and
+    // LE002.2 pedestal has no electrical twin. Codes illustrative; photos mirrored in img/variant/.
+    { id: "m-LE002",     side: "mechanical", kind: "le", code: "LE002", name: "Robot cell", parent: null },
+    { id: "m-LE002.1",   side: "mechanical", kind: "part", code: "LE002.1", name: "Robot, mechanical unit", parent: "m-LE002",
       description: "6-axis robot arm (mechanical unit)", supplier: "Kuka", image: "variant/LE002.1" },
-    { id: "m-LE002.1.1", side: "mechanical", kind: "article", code: "LE002.1.1", name: "Gripper on flange", parent: "m-LE002.1",
+    { id: "m-LE002.1.1", side: "mechanical", kind: "part", code: "LE002.1.1", name: "Gripper on flange", parent: "m-LE002.1",
       description: "Gripper, mounted on the robot flange", supplier: "Schunk", image: "variant/LE002.1.1" },
-    { id: "m-LE002.2",   side: "mechanical", kind: "bmk", code: "LE002.2", name: "Robot pedestal", parent: "m-LE002",
+    { id: "m-LE002.2",   side: "mechanical", kind: "part", code: "LE002.2", name: "Robot pedestal", parent: "m-LE002",
       note: { pt: "O pedestal só existe do lado mecânico.", en: "The pedestal only exists on the mechanical side." } },
 
-    // FT001 > LE001 (conveyor unit) > LE001.1 (gear unit) > LE001.1.1 / .1.2 / .1.3
-    { id: "m-FT001",    side: "mechanical", kind: "station", code: "FT001", name: "Conveyor technology", parent: null },
-    { id: "m-LE001",    side: "mechanical", kind: "fu", code: "LE001", name: "Conveyor unit", parent: "m-FT001",
+    // LE001 (conveyor unit) > LE001.1 (gear unit) > LE001.1.1 / .1.2 / .1.3
+    { id: "m-LE001",    side: "mechanical", kind: "le", code: "LE001", name: "Conveyor unit", parent: null,
       description: "Conveyor unit (assembly)", supplier: "Item", image: "crop/LE001" },   // supplier illustrative
-    { id: "m-LE001.1",  side: "mechanical", kind: "bmk", code: "LE001.1", name: "Gear unit", parent: "m-LE001",
+    { id: "m-LE001.1",  side: "mechanical", kind: "part", code: "LE001.1", name: "Gear unit", parent: "m-LE001",
       description: "Gear unit (sub-assembly)", supplier: "Neugart", image: "crop/LE001.1" },   // supplier illustrative
-    { id: "m-LE001.1.1", side: "mechanical", kind: "article", code: "LE001.1.1", name: "Gear wheel with shaft", parent: "m-LE001.1",
+    { id: "m-LE001.1.1", side: "mechanical", kind: "part", code: "LE001.1.1", name: "Gear wheel with shaft", parent: "m-LE001.1",
       description: "Gear wheel with shaft and base", supplier: "SEW-Eurodrive", image: "crop/LE001.1.1",   // decoy: same supplier as the motor
       note: { pt: "Também é SEW-Eurodrive, mas é uma roda dentada, não o motor: só existe do lado mecânico.",
               en: "Also SEW-Eurodrive, but it is a gear wheel, not the motor: it only exists on the mechanical side." } },
-    { id: "m-LE001.1.2", side: "mechanical", kind: "article", code: "LE001.1.2", name: "Gear housing", parent: "m-LE001.1",
+    { id: "m-LE001.1.2", side: "mechanical", kind: "part", code: "LE001.1.2", name: "Gear housing", parent: "m-LE001.1",
       description: "Cast gear housing", supplier: "Neugart", image: "crop/LE001.1.2",   // supplier illustrative
       note: { pt: "A carcaça só existe do lado mecânico.", en: "The housing only exists on the mechanical side." } },
-    { id: "m-LE001.1.3", side: "mechanical", kind: "article", code: "LE001.1.3", name: "Geared motor with spindle", parent: "m-LE001.1",
+    { id: "m-LE001.1.3", side: "mechanical", kind: "part", code: "LE001.1.3", name: "Geared motor with spindle", parent: "m-LE001.1",
       description: "Geared motor with spindle", supplier: "SEW-Eurodrive", image: "crop/LE001.1.3" }
   ],
 
@@ -168,7 +167,7 @@ window.FIO_DATA = {
       rulesKicker: "Antes de começar",
       rulesTitle: "Como funciona",
       problemTitle: "O desafio",
-      problem: "Numa fábrica de automóveis, cada estação da linha é descrita duas vezes: pela engenharia elétrica, no ePlan, e pela engenharia mecânica, nas listas de materiais (BOMs) e no Layout file, que diz onde está cada conjunto na estação. São as mesmas peças, em ficheiros diferentes e com códigos diferentes. O FIO junta as duas estruturas e encontra sozinho o que corresponde a quê.",
+      problem: "Numa fábrica de automóveis, cada estação da linha é descrita duas vezes: pela engenharia elétrica, no ePlan, e pela engenharia mecânica, nas listas de materiais (BOMs) e no Layout file, que define os elementos de layout (LE). São as mesmas peças, em ficheiros diferentes e com códigos diferentes. O FIO junta as duas estruturas e encontra sozinho o que corresponde a quê.",
       levelsTitle: "Cada estrutura é uma árvore com níveis",
       levels: {
         station: ["Estação", "a zona da linha"],
@@ -193,7 +192,7 @@ window.FIO_DATA = {
       help: "Como funciona",
       stepIntro: [
         null,
-        { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica: as BOMs dizem que peças compõem cada conjunto e o Layout file onde cada conjunto está na estação. Os códigos são outros, e a árvore também: conjunto → subconjunto → peças. Monta-a. Ligação certa? As engrenagens começam a rodar." },
+        { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica. Aqui não há estações: no topo estão os layout elements (LE…), que vêm do Layout file, e por baixo as peças das BOMs, com códigos que continuam o do pai (LE001 → LE001.1 → LE001.1.1). Ligação certa? As engrenagens começam a rodar." },
         { title: "Passo 3 · Relações", text: "Agora, o que o FIO faz sozinho: encontrar o que é a mesma peça nos dois lados. Liga cada cartão elétrico (laranja) ao mecânico (roxo) que lhe corresponde. A etiqueta do supplier ajuda, mas há iscos com o mesmo supplier, e nem tudo tem par." }
       ],
       introGo: "Vamos lá",
@@ -201,16 +200,18 @@ window.FIO_DATA = {
       electrical: "Elétrico (ePlan)",
       mechanical: "Mecânico (BOM + Layout)",
       sideWord: { electrical: "elétrico", mechanical: "mecânico" },
-      kindWord: { station: "estação", fu: "functional unit", bmk: "BMK", article: "article" },
+      kindWord: { station: "estação", fu: "functional unit", bmk: "BMK", article: "article", le: "layout element", part: "peça da BOM" },
       kindInfo: {
         station: "Estação: a raiz da árvore. Agrupa as functional units.",
         fu: "Functional unit: agrupa os BMKs por função.",
         bmk: "BMK: objeto identificado por um código.",
-        article: "Article: a peça concreta do fabricante (supplier.número)."
+        article: "Article: a peça concreta do fabricante (supplier.número).",
+        le: "Layout element (LE): vem do Layout file e é o topo da estrutura mecânica.",
+        part: "Peça da BOM: o que compõe o elemento de cima. O código continua o do pai."
       },
       intro: [
         "Monta a estrutura ELÉTRICA: puxa o ponto ＋ de uma peça até outra para as ligar, do nível de cima para o de baixo.",
-        "Agora a estrutura MECÂNICA: puxa o ponto ＋ de uma peça até outra, do nível de cima para o de baixo.",
+        "Agora a estrutura MECÂNICA: começa pelos layout elements (LE…) e puxa o ponto ＋ de uma peça até outra, do nível de cima para o de baixo.",
         "Liga cada peça elétrica à mecânica que é a mesma coisa (o mesmo article ou o mesmo equipamento): arrasta de um cartão até ao outro lado."
       ],
       armed: "Agora clica na peça a ligar.",
@@ -261,7 +262,7 @@ window.FIO_DATA = {
       rulesKicker: "Before you start",
       rulesTitle: "How it works",
       problemTitle: "The challenge",
-      problem: "In a car factory, every station on the line is described twice: by electrical engineering, in ePlan, and by mechanical engineering, in the bills of materials (BOMs) and the Layout file, which says where each assembly sits in the station. They are the same parts, in different files and with different codes. The FIO brings both structures together and works out on its own what matches what.",
+      problem: "In a car factory, every station on the line is described twice: by electrical engineering, in ePlan, and by mechanical engineering, in the bills of materials (BOMs) and the Layout file, which defines the layout elements (LE). They are the same parts, in different files and with different codes. The FIO brings both structures together and works out on its own what matches what.",
       levelsTitle: "Each structure is a tree with levels",
       levels: {
         station: ["Station", "the area of the line"],
@@ -286,7 +287,7 @@ window.FIO_DATA = {
       help: "How it works",
       stepIntro: [
         null,
-        { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it: the BOMs say which parts make up each assembly, and the Layout file where each assembly sits in the station. Different codes, and a different tree: assembly → sub-assembly → parts. Build it. Right link? The gears start turning." },
+        { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it. There are no stations here: the layout elements (LE…) from the Layout file are at the top, and the BOM items hang below them, with codes that extend the parent's (LE001 → LE001.1 → LE001.1.1). Right link? The gears start turning." },
         { title: "Step 3 · Relations", text: "Now what the FIO does on its own: find what is the same part on both sides. Link each electrical card (orange) to the mechanical card (purple) that matches it. The supplier tag helps, but some decoys share the supplier, and not everything has a partner." }
       ],
       introGo: "Let's go",
@@ -294,16 +295,18 @@ window.FIO_DATA = {
       electrical: "Electrical (ePlan)",
       mechanical: "Mechanical (BOM + Layout)",
       sideWord: { electrical: "electrical", mechanical: "mechanical" },
-      kindWord: { station: "station", fu: "functional unit", bmk: "BMK", article: "article" },
+      kindWord: { station: "station", fu: "functional unit", bmk: "BMK", article: "article", le: "layout element", part: "BOM item" },
       kindInfo: {
         station: "Station: the root of the tree. It groups functional units.",
         fu: "Functional unit: groups BMKs by function.",
         bmk: "BMK: an object identified by a code.",
-        article: "Article: the concrete part from the manufacturer (supplier.number)."
+        article: "Article: the concrete part from the manufacturer (supplier.number).",
+        le: "Layout element (LE): comes from the Layout file and is the top of the mechanical structure.",
+        part: "BOM item: what the element above is made of. Its code extends the parent's."
       },
       intro: [
         "Build the ELECTRICAL structure: pull the ＋ dot of a piece to another to link them, from the upper level to the lower one.",
-        "Now the MECHANICAL structure: pull the ＋ dot of a piece to another, from the upper level to the lower one.",
+        "Now the MECHANICAL structure: start from the layout elements (LE…) and pull the ＋ dot of a piece to another, from the upper level to the lower one.",
         "Link each electrical piece to the mechanical one that is the same thing (same article or same equipment): drag from one card to the other side."
       ],
       armed: "Now click the piece to link it to.",

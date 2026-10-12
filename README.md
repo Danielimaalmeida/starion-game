@@ -62,8 +62,11 @@ um pedestal que o elétrico não tem; fotos espelhadas em `img/variant/`) e os n
 são ilustrativos.
 
 - `articles`: peças concretas do fabricante (supplier.número), com os campos do FIO.
-- `nodes`: as peças das duas árvores. `kind` é `station`, `fu`, `bmk` ou `article`,
-  e `parent` diz onde a peça pendura: é o gabarito dos passos 1 e 2. A seta vai sempre
+- `nodes`: as peças das duas árvores. No elétrico, `kind` é `station`, `fu`, `bmk` ou `article`.
+  Na mecânica não há estações: as raízes são layout elements (`le`, do Layout file) e por baixo
+  estão as peças das BOMs (`part`), com códigos que continuam o do pai (LE001 → LE001.1 → LE001.1.1).
+  Em ambos,
+  `parent` diz onde a peça pendura: é o gabarito dos passos 1 e 2. A seta vai sempre
   do nível de cima para o de baixo; ligar peças do mesmo nível é permitido, mas conta
   como erro. Foto: `image` no próprio nó, ou a do seu `article`. Peças sem foto
   aparecem como etiqueta.
