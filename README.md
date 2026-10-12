@@ -57,8 +57,8 @@ Tecla `F` alterna ecrã inteiro. Idioma: botões **Português / English** no ecr
 ## Trocar o conteúdo
 
 Tudo está em `data.js`. As duas árvores seguem o board "3D Day – Jogo com fotos".
-Os BMKs `-Q1`, `-X1`, `-M1`, o ramo mecânico do robot (`RC001`, `RB001`, `GR001`, que
-reutiliza as fotos do robot e da garra) e os nomes e descrições mecânicos (`LE001…`)
+Os BMKs `-Q1`, `-X1`, `-M1`, o ramo mecânico do robot (`LE002…`: a garra fica montada no robot e há
+um pedestal que o elétrico não tem; fotos espelhadas em `img/variant/`) e os nomes e descrições mecânicos (`LE001…`)
 são ilustrativos.
 
 - `articles`: peças concretas do fabricante (supplier.número), com os campos do FIO.

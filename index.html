@@ -445,7 +445,8 @@
     U = unit();
     for (var id in P) { P[id].w = els[id].offsetWidth; P[id].h = els[id].offsetHeight; }
   }
-  function overlap(a, b, m) { return a.x < b.x + b.w + m && b.x < a.x + a.w + m && a.y < b.y + b.h + m && b.y < a.y + a.h + m; }
+  function hk(p) { return p.h + 2.4 * U; }   // height including the ＋ knob that hangs below the piece
+  function overlap(a, b, m) { return a.x < b.x + b.w + m && b.x < a.x + a.w + m && a.y < b.y + hk(b) + m && b.y < a.y + hk(a) + m; }
   function placeInitial() {
     var B = bounds(), placed = [];
     Object.keys(P).forEach(function (id) {
@@ -472,7 +473,7 @@
       for (var ib in P) {
         var b = P[ib]; if (b === a || !overlap(a, b, m)) continue;
         hitAny = true;
-        var ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x) + m, oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y) + m;
+        var ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x) + m, oy = Math.min(a.y + hk(a), b.y + hk(b)) - Math.max(a.y, b.y) + m;
         if (ox < oy) a.x += (a.x + a.w / 2 < b.x + b.w / 2 ? -1 : 1) * ox;
         else a.y += (a.y + a.h / 2 < b.y + b.h / 2 ? -1 : 1) * oy;
         clampPiece(a);
@@ -500,7 +501,7 @@
         var a = P[ia]; if (!a.free) return;
         ids.forEach(function (ib) {
           var b = P[ib]; if (a === b || !overlap(a, b, 1 * U)) return;
-          var ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x) + U, oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y) + U, k = b.free ? 0.5 : 1;
+          var ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x) + U, oy = Math.min(a.y + hk(a), b.y + hk(b)) - Math.max(a.y, b.y) + U, k = b.free ? 0.5 : 1;
           if (ox < oy) { var dx = a.x + a.w / 2 < b.x + b.w / 2 ? -1 : 1; a.x += dx * ox * k; a.vx = dx * Math.abs(a.vx); }
           else { var dy = a.y + a.h / 2 < b.y + b.h / 2 ? -1 : 1; a.y += dy * oy * k; a.vy = dy * Math.abs(a.vy); }
           clampPiece(a);
@@ -1007,7 +1008,11 @@
     if (!drag) {
       if (!started) return;
       var c = pieceAt(e.clientX, e.clientY), id = c && els[c.dataset.id] === c ? c.dataset.id : null;
-      if (id !== hoverId && !(mode === "checked" && !id)) { hoverId = id; if (id) showNode(id); else showDefault(); }
+      if (id !== hoverId && !(mode === "checked" && !id)) {
+        hoverId = id;
+        if (id && P[id]) els[id].style.zIndex = ++zTop;   // hovered piece comes to the front, so its ＋ is never hidden
+        if (id) showNode(id); else showDefault();
+      }
       return;
     }
     if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) drag.moved = true;

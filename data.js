@@ -102,14 +102,17 @@ window.FIO_DATA = {
       article: "SEW.R37DRN71M4" },
 
     // ================= mechanical tree =================
-    // ST001 > RC001 (robot cell) > RB001, GR001: the same robot and gripper as on the
-    // electrical side, as the BOM sees them (codes illustrative, photos shared).
-    { id: "m-ST001",  side: "mechanical", kind: "station", code: "ST001", name: "Station", parent: null },
-    { id: "m-RC001",  side: "mechanical", kind: "fu", code: "RC001", name: "Robot cell", parent: "m-ST001" },
-    { id: "m-RB001",  side: "mechanical", kind: "bmk", code: "RB001", name: "Industrial robot", parent: "m-RC001",
-      description: "Industrial robot, 6 axes", supplier: "Kuka", image: "crop/+IR001" },
-    { id: "m-GR001",  side: "mechanical", kind: "bmk", code: "GR001", name: "Gripper", parent: "m-RC001",
-      description: "Gripper", supplier: "Schunk", image: "crop/FG001" },
+    // Robot branch, as the BOM sees it: LE002 (robot cell) > LE002.1 robot > LE002.1.1 gripper
+    // (mounted on the robot, unlike the electrical tree), plus LE002.2 pedestal, which the
+    // electrical side does not have. Codes illustrative; photos are mirrored copies in img/variant/.
+    { id: "m-ST001",     side: "mechanical", kind: "station", code: "ST001", name: "Station", parent: null },
+    { id: "m-LE002",     side: "mechanical", kind: "fu", code: "LE002", name: "Robot cell", parent: "m-ST001" },
+    { id: "m-LE002.1",   side: "mechanical", kind: "bmk", code: "LE002.1", name: "Robot, mechanical unit", parent: "m-LE002",
+      description: "6-axis robot arm (mechanical unit)", supplier: "Kuka", image: "variant/LE002.1" },
+    { id: "m-LE002.1.1", side: "mechanical", kind: "article", code: "LE002.1.1", name: "Gripper on flange", parent: "m-LE002.1",
+      description: "Gripper, mounted on the robot flange", supplier: "Schunk", image: "variant/LE002.1.1" },
+    { id: "m-LE002.2",   side: "mechanical", kind: "bmk", code: "LE002.2", name: "Robot pedestal", parent: "m-LE002",
+      note: { pt: "O pedestal só existe do lado mecânico.", en: "The pedestal only exists on the mechanical side." } },
 
     // FT001 > LE001 (conveyor unit) > LE001.1 (gear unit) > LE001.1.1 / .1.2 / .1.3
     { id: "m-FT001",    side: "mechanical", kind: "station", code: "FT001", name: "Conveyor technology", parent: null },
@@ -129,11 +132,11 @@ window.FIO_DATA = {
   ],
 
   answerKey: [
-    { e: "e-IR001", m: "m-RB001",
-      why: { pt: "O mesmo robot KUKA: no elétrico é a functional unit +IR001, no mecânico é a posição RB001.",
-             en: "The same KUKA robot: functional unit +IR001 on the electrical side, position RB001 on the mechanical side." } },
-    { e: "e-FG001", m: "m-GR001",
-      why: { pt: "A mesma garra Schunk nos dois lados.", en: "The same Schunk gripper on both sides." } },
+    { e: "e-IR001", m: "m-LE002.1",
+      why: { pt: "O mesmo robot KUKA: no elétrico é a functional unit +IR001, no mecânico é a posição LE002.1, com outro código e noutro sítio da árvore.",
+             en: "The same KUKA robot: functional unit +IR001 on the electrical side, position LE002.1 on the mechanical side, with another code and in another place of the tree." } },
+    { e: "e-FG001", m: "m-LE002.1.1",
+      why: { pt: "A mesma garra Schunk: no mecânico está montada no robot (LE002.1.1).", en: "The same Schunk gripper: on the mechanical side it is mounted on the robot (LE002.1.1)." } },
     { e: "e-SEW", m: "m-LE001.1.3",
       why: { pt: "O mesmo motorredutor SEW.R37DRN71M4: no elétrico é o article, no mecânico é a posição LE001.1.3.",
              en: "The same SEW.R37DRN71M4 geared motor: an article on the electrical side, position LE001.1.3 on the mechanical side." } }
