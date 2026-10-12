@@ -32,8 +32,11 @@ Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` 
 - Passo 3: arrastar de um cartão elétrico (laranja) para um mecânico (roxo) (ou clicar num e no outro).
 - Apagar uma ligação: clicar no `×` a meio do fio. `Limpar` apaga as do passo atual.
 - `Dica`: até 3 por passo, progressivas. Cada uma custa um ponto.
-- `Verificar`: fios certos a verde ✓, errados a vermelho ✗, em falta a ponteado ?.
-  Passar o rato por um fio explica porquê. `Continuar` passa ao passo seguinte.
+- `Verificar`: fios certos com ✓ verde, errados a vermelho ✗, em falta a ponteado ?.
+  Nos passos 1 e 3, os fios certos ganham corrente elétrica: um clarão percorre-os um a um
+  e depois fica uma corrente contínua (`config.currentOnLink: true` mostra-a logo ao
+  ligar, mas revela as respostas). Passar o rato por um fio explica porquê.
+  `Continuar` passa ao passo seguinte.
 - `Recomeçar` volta ao passo 1. Se já houver progresso, pede um segundo clique.
 - Sem interação durante 60 s: aviso de 10 s e volta ao ecrã inicial.
 

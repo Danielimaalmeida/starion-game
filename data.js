@@ -38,6 +38,9 @@ window.FIO_DATA = {
     shuffle: true,            // shuffle card order inside each group in step 3
     hidePhotos: "none",       // step 3 only: "none" | "electrical" | "mechanical" (shows "?" until hover)
     showTimer: true,
+    // Electric current along correct links (steps 1 and 3). false: only after Check
+    // (answers stay hidden). true: as soon as a correct link is made (instant feedback).
+    currentOnLink: false,
     maxHints: 3,              // per step
     idleSeconds: 60,          // no input for this long -> back to the welcome screen
     idleWarnSeconds: 10,      // countdown shown before the automatic restart

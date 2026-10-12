@@ -148,6 +148,9 @@
   .link.ok .mk circle { fill: var(--ok); stroke: var(--ok); } .link.ok .mk text { fill: #fff; }
   .link.bad .mk circle { fill: var(--bad); stroke: var(--bad); } .link.bad .mk text { fill: #fff; }
   .link.missing .mk circle { fill: #fff; stroke: var(--warn); } .link.missing .mk text { fill: var(--warn); }
+  .link .current, .link .surge { fill: none; stroke-linecap: round; pointer-events: none; }
+  .link .current { stroke: #ffd60a; stroke-width: calc(var(--u) * .6); }
+  .link .surge { stroke: #ffe94d; stroke-width: calc(var(--u) * 1.5); }
   #ghost path { fill: none; stroke: var(--navy); stroke-width: calc(var(--u) * .75); stroke-linecap: round; stroke-dasharray: 0 calc(var(--u) * 1.5); opacity: .7; }
 
   /* ---------- footer / details ---------- */
@@ -528,6 +531,12 @@
       m.appendChild(S("circle", { cx: s / 2, cy: s / 2, r: s / 2 - 0.5, fill: DOT[k], stroke: "#fff", "stroke-width": 1 }));
       d.appendChild(m);
     });
+    var sr0 = stage.getBoundingClientRect(), f = S("filter", { id: "glow", filterUnits: "userSpaceOnUse", x: -50, y: -50, width: sr0.width + 100, height: sr0.height + 100 });
+    f.appendChild(S("feFlood", { "flood-color": "#ffb000", result: "c" }));
+    f.appendChild(S("feComposite", { "in": "c", in2: "SourceAlpha", operator: "in", result: "s" }));
+    f.appendChild(S("feGaussianBlur", { "in": "s", stdDeviation: 0.6 * U, result: "b" }));
+    var fm = S("feMerge", {}); fm.appendChild(S("feMergeNode", { "in": "b" })); fm.appendChild(S("feMergeNode", { "in": "b" })); fm.appendChild(S("feMergeNode", { "in": "SourceGraphic" }));
+    f.appendChild(fm); d.appendChild(f);
     if (type() === "relate") {   // electrical amber -> mechanical blue, across the gap between the columns
       var sr = stage.getBoundingClientRect();
       var g = S("linearGradient", { id: "rope-grad", gradientUnits: "userSpaceOnUse", y1: 0, y2: 0,
@@ -555,6 +564,24 @@
       setTimeout(function () { p.style.strokeDasharray = ""; p.style.strokeDashoffset = ""; p.style.transition = ""; }, (delay + dur) * 1000 + 50);
     });
   }
+  // Electric current along a correct link (steps 1 and 3): a bright surge runs from
+  // parent to child (or electrical to mechanical), then a steady flow keeps going.
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches, zap = 0;
+  function electrify(g, d, entry, delay, surge) {
+    var flow = S("path", { d: d, "class": "current", filter: "url(#glow)" });
+    g.appendChild(flow); entry.paths.push(flow);
+    var period = 6.4 * U, start = (delay + (surge ? 0.7 : 0)) * 1000;
+    flow.style.strokeDasharray = (1.5 * U) + " " + (period - 1.5 * U);
+    flow.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -period }], { duration: 420, iterations: Infinity });
+    flow.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: start, fill: "both" });
+    if (!surge) return;
+    var sp = S("path", { d: d, "class": "surge", filter: "url(#glow)" });
+    g.appendChild(sp); entry.paths.push(sp);
+    var len = sp.getTotalLength(), dash = 9 * U;
+    sp.style.strokeDasharray = dash + " " + (len + dash);
+    sp.animate([{ strokeDashoffset: dash, opacity: 1, offset: 0 }, { strokeDashoffset: -len, opacity: 1, offset: 0.92 }, { strokeDashoffset: -len, opacity: 0, offset: 1 }],
+               { duration: 900, delay: delay * 1000, easing: "ease-in-out", fill: "both" });
+  }
   function drawItem(it, idx) {
     var G = geom(it), key = it.a + "|" + it.b, build = type() === "build";
     var cls = "link " + it.cls + (it.removable ? " removable" : "");
@@ -566,6 +593,9 @@
     g.appendChild(halo); g.appendChild(line); g.appendChild(hit);
     svg.appendChild(g);
     var entry = { it: it, paths: [halo, line, hit], mk: null };
+    var electric = !REDUCED && (type() === "relate" || STEPS[step].side === "electrical") &&
+      ((mode === "checked" && it.cls === "ok") || (mode === "play" && cfg.currentOnLink && !!keyFor(it.a, it.b)));
+    if (electric) electrify(g, G.d, entry, mode === "checked" ? 0.3 * zap++ : 0, mode === "checked" || key === justAdded);
     if (it.mark) {   // markers live in their own layer, above the pieces
       var mg = S("g", { "class": cls });
       entry.mk = marker(mg, G.M.x, G.M.y, it.mark, it.mark === "×" ? 2.4 : 2);
@@ -592,7 +622,7 @@
   function drawLinks() {
     if (!started) return;
     U = unit();
-    svg.replaceChildren(); svg.appendChild(defs()); marks.replaceChildren(); drawn = [];
+    svg.replaceChildren(); svg.appendChild(defs()); marks.replaceChildren(); drawn = []; zap = 0;
     var items = [];
     if (mode === "play") {
       items = links.map(function (l) { return { a: l.a, b: l.b, cls: "play", mark: "×", removable: true }; });
