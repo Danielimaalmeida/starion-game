@@ -153,6 +153,11 @@
   .link.ok .mk circle { fill: var(--ok); stroke: var(--ok); } .link.ok .mk text { fill: #fff; }
   .link.bad .mk circle { fill: var(--bad); stroke: var(--bad); } .link.bad .mk text { fill: #fff; }
   .link.missing .mk circle { fill: #fff; stroke: var(--warn); } .link.missing .mk text { fill: var(--warn); }
+  .gears { pointer-events: none; }
+  .gear-pop, .gear-rot { transform-box: fill-box; transform-origin: center; }
+  .gear { stroke: #fff; stroke-width: calc(var(--u) * .25); stroke-linejoin: round; }
+  .g1 .gear { fill: var(--m); } .g2 .gear { fill: #8b82e3; }
+  .gear-hole { fill: #fff; }
   .link .current, .link .surge { fill: none; stroke-linecap: round; pointer-events: none; }
   .link .current { stroke: #ffd60a; stroke-width: calc(var(--u) * .6); }
   .link .surge { stroke: #ffe94d; stroke-width: calc(var(--u) * 1.5); }
@@ -182,6 +187,10 @@
   .steps { display: flex; gap: calc(var(--u) * 2.5); margin-bottom: calc(var(--u) * 5); }
   .step { width: calc(var(--u) * 34); padding: calc(var(--u) * 2.2); background: rgba(255,255,255,.08); border-radius: calc(var(--u) * 1.6); font-size: calc(var(--u) * 2.2); line-height: 1.3; text-align: left; }
   .step b { display: block; font-size: calc(var(--u) * 4.4); color: #ffd23f; margin-bottom: calc(var(--u) * .6); }
+  .langs { display: flex; gap: calc(var(--u) * 1.5); margin: calc(var(--u) * -2) 0 calc(var(--u) * 3.5); }
+  .lang { height: calc(var(--u) * 6); padding: 0 calc(var(--u) * 3); border-radius: 999px; font-size: calc(var(--u) * 2.3); font-weight: 700;
+          background: transparent; color: #fff; border: calc(var(--u) * .25) solid rgba(255,255,255,.5); }
+  .lang.on { background: #fff; color: var(--navy); border-color: #fff; }
   .btn.big { height: calc(var(--u) * 10); padding: 0 calc(var(--u) * 7); font-size: calc(var(--u) * 4); border-radius: calc(var(--u) * 2); }
   #idle { z-index: 20; }
   /* how-it-works screen */
@@ -253,6 +262,7 @@
   <h1 id="wTitle"></h1>
   <p class="lead" id="wLead"></p>
   <div class="steps" id="wSteps"></div>
+  <div class="langs" id="wLangs"></div>
   <button class="btn primary big" id="btnStart" type="button"></button>
 </div>
 
@@ -645,6 +655,36 @@
     sp.animate([{ strokeDashoffset: dash, opacity: 1, offset: 0 }, { strokeDashoffset: -len, opacity: 1, offset: 0.92 }, { strokeDashoffset: -len, opacity: 0, offset: 1 }],
                { duration: 900, delay: delay * 1000, easing: "ease-in-out", fill: "both" });
   }
+  // Mechanical hint (step 2): two meshing gears pop in and keep turning on a correct link.
+  function gearPath(r, teeth) {
+    var d = "", n = teeth * 4, ri = r * 0.74;
+    for (var i = 0; i < n; i++) {
+      var a = (i / n) * Math.PI * 2, rr = (i % 4 < 2) ? r : ri;
+      d += (i ? "L" : "M") + (Math.cos(a) * rr).toFixed(2) + " " + (Math.sin(a) * rr).toFixed(2);
+    }
+    return d + "Z";
+  }
+  function gearEl(r, teeth, dir, dur, cls) {
+    var pop = S("g", { "class": "gear-pop" }), rot = S("g", { "class": "gear-rot " + cls });
+    rot.appendChild(S("path", { d: gearPath(r, teeth), "class": "gear" }));
+    rot.appendChild(S("circle", { r: r * 0.3, "class": "gear-hole" }));
+    pop.appendChild(rot);
+    rot.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(" + (360 * dir) + "deg)" }], { duration: dur, iterations: Infinity });
+    return pop;
+  }
+  function gearAt(line) { var len = line.getTotalLength(); return line.getPointAtLength(len * 0.3); }
+  function gearify(entry, line, delay, popIn) {
+    var grp = S("g", { "class": "gears" }), big = 2.6 * U, small = 1.75 * U;
+    var g1 = gearEl(big, 10, 1, 3200, "g1"), g2 = gearEl(small, 7, -1, 3200 * 7 / 10, "g2");
+    var pos2 = S("g", { transform: "translate(" + ((big + small) * 0.86) + " " + (-0.4 * U) + ")" });
+    pos2.appendChild(g2); grp.appendChild(g1); grp.appendChild(pos2);
+    var p = gearAt(line); grp.setAttribute("transform", "translate(" + p.x + " " + p.y + ")");
+    marks.appendChild(grp); entry.gears = grp;
+    if (popIn) [g1, g2].forEach(function (g, i) {
+      g.animate([{ transform: "scale(0) rotate(-90deg)" }, { transform: "scale(1.25)", offset: 0.7 }, { transform: "scale(1)" }],
+                { duration: 550, delay: (delay + i * 0.12) * 1000, easing: "ease-out", fill: "both" });
+    });
+  }
   function drawItem(it, idx) {
     var G = geom(it), key = it.a + "|" + it.b, build = type() === "build";
     var cls = "link " + it.cls + (it.removable ? " removable" : "");
@@ -659,6 +699,9 @@
     var electric = !REDUCED && (type() === "relate" || STEPS[step].side === "electrical") &&
       ((mode === "checked" && it.cls === "ok") || (mode === "play" && cfg.currentOnLink && !!keyFor(it.a, it.b)));
     if (electric) electrify(g, G.d, entry, mode === "checked" ? 0.3 * zap++ : 0, mode === "checked" || key === justAdded);
+    var geared = !REDUCED && type() === "build" && STEPS[step].side === "mechanical" &&
+      ((mode === "checked" && it.cls === "ok") || (mode === "play" && cfg.currentOnLink && !!keyFor(it.a, it.b)));
+    if (geared) gearify(entry, line, mode === "checked" ? 0.25 * zap++ : 0, mode === "checked" || key === justAdded);
     if (it.mark) {   // markers live in their own layer, above the pieces
       var mg = S("g", { "class": cls });
       entry.mk = marker(mg, G.M.x, G.M.y, it.mark, it.mark === "×" ? 2.4 : 2);
@@ -680,6 +723,7 @@
       var G = geom(en.it);
       en.paths.forEach(function (p) { p.setAttribute("d", G.d); });
       if (en.mk) en.mk.setAttribute("transform", "translate(" + G.M.x + " " + G.M.y + ")");
+      if (en.gears) { var gp = gearAt(en.paths[1]); en.gears.setAttribute("transform", "translate(" + gp.x + " " + gp.y + ")"); }
     });
   }
   function drawLinks() {
@@ -733,6 +777,7 @@
     if (mode === "play") {
       if (cfg.showTimer) s.appendChild(make("span", "dim mono", "⏱ " + fmtTime(Date.now() - startTime)));
       s.appendChild(make("span", "dim", T.links(links.length)));
+      if (type() === "relate") s.appendChild(make("span", "chip miss", T.toFind(D.answerKey.length)));
     } else if (mode === "checked" && results) {
       var sc = make("span", "score"); sc.appendChild(make("b", null, String(results.score)));
       sc.appendChild(make("small", null, "/ " + results.max + " " + T.points)); s.appendChild(sc);
@@ -855,7 +900,8 @@
   }
   function showStepIntro(i) {
     var si = T.stepIntro && T.stepIntro[i]; if (!si) return;
-    $("siKicker").textContent = (i + 1) + " / " + STEPS.length; $("siTitle").textContent = si.title; $("siText").textContent = si.text;
+    $("siKicker").textContent = (i + 1) + " / " + STEPS.length; $("siTitle").textContent = si.title;
+    $("siText").textContent = si.text + (STEPS[i].type === "relate" ? " " + T.toFindLong(D.answerKey.length) : "");
     $("stepIntro").classList.remove("hidden");
   }
   function hideExplanations() { $("rules").classList.add("hidden"); $("stepIntro").classList.add("hidden"); }
@@ -1021,6 +1067,12 @@
   $("wLead").textContent = T.welcomeLead;
   T.steps.forEach(function (s, i) { var d = make("div", "step"); d.appendChild(make("b", null, String(i + 1))); d.appendChild(document.createTextNode(s)); $("wSteps").appendChild(d); });
   $("btnStart").textContent = T.start;
+  Object.keys(D.ui).forEach(function (code) {   // switching reloads the page in that language (works offline on file://)
+    var b = make("button", "lang" + (code === lang ? " on" : ""), D.ui[code].langName || code.toUpperCase());
+    b.type = "button";
+    b.addEventListener("click", function () { if (code !== lang) location.search = "?lang=" + code; });
+    $("wLangs").appendChild(b);
+  });
   $("rKicker").textContent = T.rulesKicker; $("rTitle").textContent = T.rulesTitle;
   $("rProblemT").textContent = T.problemTitle; $("rProblem").textContent = T.problem;
   $("rLevelsT").textContent = T.levelsTitle; $("rNote").textContent = T.levelsNote;

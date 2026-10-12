@@ -41,8 +41,8 @@ window.FIO_DATA = {
     // One property shown on every photo piece: the node's `prop` ({ pt, en } or text)
     // if it has one, otherwise its supplier. Matching pieces share it; decoys do too.
     showProperty: true,
-    // Electric current along correct links (steps 1 and 3), as a hint: true = as soon as a
-    // correct link is made; false = only after Check (answers fully hidden until then).
+    // Hint on correct links: electric current (steps 1 and 3) or turning gears (step 2).
+    // true = as soon as a correct link is made; false = only after Check.
     currentOnLink: true,
     maxHints: 3,              // per step
     idleSeconds: 60,          // no input for this long -> back to the welcome screen
@@ -102,6 +102,15 @@ window.FIO_DATA = {
       article: "SEW.R37DRN71M4" },
 
     // ================= mechanical tree =================
+    // ST001 > RC001 (robot cell) > RB001, GR001: the same robot and gripper as on the
+    // electrical side, as the BOM sees them (codes illustrative, photos shared).
+    { id: "m-ST001",  side: "mechanical", kind: "station", code: "ST001", name: "Station", parent: null },
+    { id: "m-RC001",  side: "mechanical", kind: "fu", code: "RC001", name: "Robot cell", parent: "m-ST001" },
+    { id: "m-RB001",  side: "mechanical", kind: "bmk", code: "RB001", name: "Industrial robot", parent: "m-RC001",
+      description: "Industrial robot, 6 axes", supplier: "Kuka", image: "crop/+IR001" },
+    { id: "m-GR001",  side: "mechanical", kind: "bmk", code: "GR001", name: "Gripper", parent: "m-RC001",
+      description: "Gripper", supplier: "Schunk", image: "crop/FG001" },
+
     // FT001 > LE001 (conveyor unit) > LE001.1 (gear unit) > LE001.1.1 / .1.2 / .1.3
     { id: "m-FT001",    side: "mechanical", kind: "station", code: "FT001", name: "Conveyor technology", parent: null },
     { id: "m-LE001",    side: "mechanical", kind: "fu", code: "LE001", name: "Conveyor unit", parent: "m-FT001",
@@ -120,6 +129,11 @@ window.FIO_DATA = {
   ],
 
   answerKey: [
+    { e: "e-IR001", m: "m-RB001",
+      why: { pt: "O mesmo robot KUKA: no elétrico é a functional unit +IR001, no mecânico é a posição RB001.",
+             en: "The same KUKA robot: functional unit +IR001 on the electrical side, position RB001 on the mechanical side." } },
+    { e: "e-FG001", m: "m-GR001",
+      why: { pt: "A mesma garra Schunk nos dois lados.", en: "The same Schunk gripper on both sides." } },
     { e: "e-SEW", m: "m-LE001.1.3",
       why: { pt: "O mesmo motorredutor SEW.R37DRN71M4: no elétrico é o article, no mecânico é a posição LE001.1.3.",
              en: "The same SEW.R37DRN71M4 geared motor: an article on the electrical side, position LE001.1.3 on the mechanical side." } }
@@ -136,6 +150,9 @@ window.FIO_DATA = {
 
   ui: {
     pt: {
+      langName: "Português",
+      toFind: n => n + (n === 1 ? " relação para encontrar" : " relações para encontrar"),
+      toFindLong: n => "Neste passo há " + n + (n === 1 ? " relação certa." : " relações certas."),
       brandSub: "Factory Information Organizer",
       welcomeTitle: "Monta a estrutura da fábrica",
       welcomeLead: "O FIO organiza e liga automaticamente a estrutura elétrica (ePlan) e a mecânica (BOM). Consegues fazer o mesmo?",
@@ -163,7 +180,7 @@ window.FIO_DATA = {
         ["✋", "Arrasta as peças para arrumar a árvore."],
         ["×", "Enganaste-te? Clica no × do fio para o apagar."],
         ["🏷", "Cada peça mostra uma propriedade, o supplier. No passo 3, peças que são a mesma coisa têm o mesmo supplier, mas há iscos: confirma a foto e a descrição."],
-        ["⚡", "Pista: se a ligação estiver certa, passa corrente elétrica no fio.", "current"],
+        ["⚡", "Pista: se a ligação estiver certa, passa corrente elétrica no fio (no mecânico, rodam engrenagens).", "current"],
         ["✓", "No fim de cada passo, carrega em Verificar: +1 por ligação certa, −1 por errada."]
       ],
       stepsTitle: "3 passos",
@@ -173,7 +190,7 @@ window.FIO_DATA = {
       help: "Como funciona",
       stepIntro: [
         null,
-        { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica (BOM). Os códigos são outros, e a árvore também: conjunto → subconjunto → peças. Monta-a." },
+        { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica (BOM). Os códigos são outros, e a árvore também: conjunto → subconjunto → peças. Monta-a. Ligação certa? As engrenagens começam a rodar." },
         { title: "Passo 3 · Relações", text: "Agora, o que o FIO faz sozinho: encontrar o que é a mesma peça nos dois lados. Liga cada cartão elétrico (laranja) ao mecânico (roxo) que lhe corresponde. A etiqueta do supplier ajuda, mas há iscos com o mesmo supplier, e nem tudo tem par." }
       ],
       introGo: "Vamos lá",
@@ -226,6 +243,9 @@ window.FIO_DATA = {
       missed: "Faltou esta ligação."
     },
     en: {
+      langName: "English",
+      toFind: n => n + (n === 1 ? " relation to find" : " relations to find"),
+      toFindLong: n => "There " + (n === 1 ? "is 1 correct relation" : "are " + n + " correct relations") + " in this step.",
       brandSub: "Factory Information Organizer",
       welcomeTitle: "Build the factory structure",
       welcomeLead: "The FIO organises and links the electrical (ePlan) and mechanical (BOM) structures automatically. Can you do the same?",
@@ -253,7 +273,7 @@ window.FIO_DATA = {
         ["✋", "Drag pieces around to tidy up the tree."],
         ["×", "Made a mistake? Click the × on the thread to remove it."],
         ["🏷", "Each piece shows one property, its supplier. In step 3, pieces that are the same thing share the supplier, but there are decoys: check the photo and the description too."],
-        ["⚡", "Hint: if the link is right, electric current runs through the thread.", "current"],
+        ["⚡", "Hint: if the link is right, electric current runs through the thread (on the mechanical side, gears start turning).", "current"],
         ["✓", "At the end of each step, press Check: +1 per correct link, −1 per wrong one."]
       ],
       stepsTitle: "3 steps",
@@ -263,7 +283,7 @@ window.FIO_DATA = {
       help: "How it works",
       stepIntro: [
         null,
-        { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it (BOM). Different codes, and a different tree: assembly → sub-assembly → parts. Build it." },
+        { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it (BOM). Different codes, and a different tree: assembly → sub-assembly → parts. Build it. Right link? The gears start turning." },
         { title: "Step 3 · Relations", text: "Now what the FIO does on its own: find what is the same part on both sides. Link each electrical card (orange) to the mechanical card (purple) that matches it. The supplier tag helps, but some decoys share the supplier, and not everything has a partner." }
       ],
       introGo: "Let's go",

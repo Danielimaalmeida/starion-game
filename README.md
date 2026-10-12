@@ -18,7 +18,8 @@ Modo quiosque (ecrã inteiro, sem barras):
 chrome --kiosk --app=file:///CAMINHO/PARA/starion-game/index.html
 ```
 
-Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` em `data.js`).
+Tecla `F` alterna ecrã inteiro. Idioma: botões **Português / English** no ecrã inicial
+(guarda-se no endereço, `index.html?lang=en`; por omissão `config.lang` em `data.js`).
 
 ## Fluxo
 
@@ -39,12 +40,15 @@ Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` 
     automático, do nível de cima para o de baixo.
   - Também dá para clicar no ＋ e depois na outra peça.
 - Passo 3: arrastar de um cartão elétrico (laranja) para um mecânico (roxo) (ou clicar num e no outro).
+  O cabeçalho e o cartão de entrada dizem quantas relações há para encontrar (hoje 3:
+  robot, garra e motor SEW).
 - Apagar uma ligação: clicar no `×` a meio do fio. `Limpar` apaga as do passo atual.
 - `Dica`: até 3 por passo, progressivas. Cada uma custa um ponto.
 - `Verificar`: fios certos com ✓ verde, errados a vermelho ✗, em falta a ponteado ?.
   Passar o rato por um fio explica porquê.
-- Pista: nos passos 1 e 3, quando fazes uma ligação certa, um clarão amarelo percorre o fio
-  e fica uma corrente elétrica contínua. A pontuação só conta ao Verificar.
+- Pista: quando fazes uma ligação certa, nos passos 1 e 3 um clarão amarelo percorre o fio e
+  fica uma corrente elétrica contínua; no passo 2 aparecem duas engrenagens a rodar.
+  A pontuação só conta ao Verificar.
   Para esconder a pista até ao Verificar: `config.currentOnLink: false`.
   `Continuar` passa ao passo seguinte.
 - `Recomeçar` volta ao passo 1. Se já houver progresso, pede um segundo clique.
@@ -53,7 +57,9 @@ Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` 
 ## Trocar o conteúdo
 
 Tudo está em `data.js`. As duas árvores seguem o board "3D Day – Jogo com fotos".
-Os BMKs `-Q1`, `-X1`, `-M1` e os nomes e descrições mecânicos (`LE001…`) são ilustrativos.
+Os BMKs `-Q1`, `-X1`, `-M1`, o ramo mecânico do robot (`RC001`, `RB001`, `GR001`, que
+reutiliza as fotos do robot e da garra) e os nomes e descrições mecânicos (`LE001…`)
+são ilustrativos.
 
 - `articles`: peças concretas do fabricante (supplier.número), com os campos do FIO.
 - `nodes`: as peças das duas árvores. `kind` é `station`, `fu`, `bmk` ou `article`,
