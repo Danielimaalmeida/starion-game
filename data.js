@@ -2,8 +2,8 @@
  * FIO – Build the structure: game content.
  *
  * Edit this file to swap in real data; index.html does not need to change.
- * The electrical tree follows the "3D Day – Jogo com fotos" board; the
- * mechanical tree and some article fields are still ILLUSTRATIVE.
+ * Both trees follow the "3D Day – Jogo com fotos" board. The BMKs -Q1, -X1,
+ * -M1 and the mechanical names/descriptions are ILLUSTRATIVE.
  *
  * The game has 3 steps:
  *   1. build the ELECTRICAL tree
@@ -63,22 +63,6 @@ window.FIO_DATA = {
       title: "SEW.R37DRN71M4", description: "Helical geared motor, 0.37 kW, 4-pole",
       subgroupNumber: "412", subgroup: "Geared Motors",
       supplier: "SEW-Eurodrive", typeDesignation: "R37DRN71M4", image: "crop/SEW.R37DRN71M4"
-    },
-    // ---- illustrative (mechanical side) ----
-    "KUKA.KR6-R900": {
-      title: "KUKA.KR6-R900", description: "6-axis industrial robot, 6 kg payload",
-      subgroupNumber: "800", subgroup: "Industrial robots",
-      supplier: "KUKA", typeDesignation: "KR 6 R900", image: "robot_kuka"
-    },
-    "INTERROLL.RE-50": {
-      title: "INTERROLL.RE-50", description: "Conveyor roller, Ø 50 mm, steel",
-      subgroupNumber: "530", subgroup: "Conveyor rollers",
-      supplier: "Interroll", typeDesignation: "RE-50", image: "rolos_transportador"
-    },
-    "ITEM.PROFIL-40": {
-      title: "ITEM.PROFIL-40", description: "Aluminium profile 40 x 40, slot 8",
-      subgroupNumber: "520", subgroup: "Aluminium profiles",
-      supplier: "Item", typeDesignation: "Profile 40x40", image: "perfil_aluminio"
     }
   },
 
@@ -111,35 +95,27 @@ window.FIO_DATA = {
     { id: "e-SEW",   side: "electrical", kind: "article", code: "SEW.R37DRN71M4", name: "Geared motor", parent: "e-M1",
       article: "SEW.R37DRN71M4" },
 
-    // ================= mechanical tree (illustrative, same shape) =================
-    { id: "m-ST001", side: "mechanical", kind: "station", code: "ST001", name: "Station", parent: null },
-    { id: "m-IR001", side: "mechanical", kind: "fu", code: "IR001", name: "Robot cell", parent: "m-ST001" },
-    { id: "m-RB01",  side: "mechanical", kind: "bmk", code: "RB01", name: "6-Axis Robot", parent: "m-IR001", article: "KUKA.KR6-R900" },
-    { id: "m-GR01",  side: "mechanical", kind: "bmk", code: "GR01", name: "Gripper", parent: "m-IR001",
-      description: "Robot gripper", image: "garra_robot" },
-
-    { id: "m-FT001", side: "mechanical", kind: "station", code: "FT001", name: "Conveyor technology", parent: null },
-    { id: "m-CV01",  side: "mechanical", kind: "fu", code: "CV01", name: "Belt conveyor", parent: "m-FT001" },
-    { id: "m-DR01",  side: "mechanical", kind: "bmk", code: "DR01", name: "Drive", parent: "m-CV01" },
-    { id: "m-RL01",  side: "mechanical", kind: "bmk", code: "RL01", name: "Roller bed", parent: "m-CV01" },
-    { id: "m-FR01",  side: "mechanical", kind: "bmk", code: "FR01", name: "Frame", parent: "m-CV01" },
-    { id: "m-SEW",   side: "mechanical", kind: "article", code: "SEW.R37DRN71M4", name: "Geared motor", parent: "m-DR01",
-      article: "SEW.R37DRN71M4" },
-    { id: "m-RO01",  side: "mechanical", kind: "article", code: "INTERROLL.RE-50", name: "Rollers", parent: "m-RL01",
-      article: "INTERROLL.RE-50",
-      note: { pt: "Rolos só existem no mecânico.", en: "Rollers only exist on the mechanical side." } },
-    { id: "m-AP01",  side: "mechanical", kind: "article", code: "ITEM.PROFIL-40", name: "Aluminium profile", parent: "m-FR01",
-      article: "ITEM.PROFIL-40",
-      note: { pt: "Perfis só existem no mecânico.", en: "Profiles only exist on the mechanical side." } }
+    // ================= mechanical tree =================
+    // FT001 > LE001 (conveyor unit) > LE001.1 (gear unit) > LE001.1.1 / .1.2 / .1.3
+    { id: "m-FT001",    side: "mechanical", kind: "station", code: "FT001", name: "Conveyor technology", parent: null },
+    { id: "m-LE001",    side: "mechanical", kind: "fu", code: "LE001", name: "Conveyor unit", parent: "m-FT001",
+      description: "Conveyor unit (assembly)", image: "crop/LE001" },
+    { id: "m-LE001.1",  side: "mechanical", kind: "bmk", code: "LE001.1", name: "Gear unit", parent: "m-LE001",
+      description: "Gear unit (sub-assembly)", image: "crop/LE001.1" },
+    { id: "m-LE001.1.1", side: "mechanical", kind: "article", code: "LE001.1.1", name: "Gear wheel with shaft", parent: "m-LE001.1",
+      description: "Gear wheel with shaft and base", image: "crop/LE001.1.1",
+      note: { pt: "A roda dentada só existe do lado mecânico.", en: "The gear wheel only exists on the mechanical side." } },
+    { id: "m-LE001.1.2", side: "mechanical", kind: "article", code: "LE001.1.2", name: "Gear housing", parent: "m-LE001.1",
+      description: "Cast gear housing", image: "crop/LE001.1.2",
+      note: { pt: "A carcaça só existe do lado mecânico.", en: "The housing only exists on the mechanical side." } },
+    { id: "m-LE001.1.3", side: "mechanical", kind: "article", code: "LE001.1.3", name: "Geared motor with spindle", parent: "m-LE001.1",
+      description: "Geared motor with spindle", supplier: "SEW-Eurodrive", image: "crop/LE001.1.3" }
   ],
 
   answerKey: [
-    { e: "e-IR001", m: "m-RB01",
-      why: { pt: "O mesmo robot KUKA, visto pelo elétrico e pelo mecânico.", en: "The same KUKA robot, seen from the electrical and the mechanical side." } },
-    { e: "e-FG001", m: "m-GR01",
-      why: { pt: "A mesma garra do robot nos dois lados.", en: "The same robot gripper on both sides." } },
-    { e: "e-SEW",   m: "m-SEW",
-      why: { pt: "Mesmo article: SEW.R37DRN71M4.", en: "Same article: SEW.R37DRN71M4." } }
+    { e: "e-SEW", m: "m-LE001.1.3",
+      why: { pt: "O mesmo motorredutor SEW.R37DRN71M4: no elétrico é o article, no mecânico é a posição LE001.1.3.",
+             en: "The same SEW.R37DRN71M4 geared motor: an article on the electrical side, position LE001.1.3 on the mechanical side." } }
   ],
 
   ui: {

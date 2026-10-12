@@ -29,7 +29,7 @@ Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` 
   - Puxar o ponto ＋ de uma peça até outra: cria uma ligação (um fio). O sentido é
     automático, do nível de cima para o de baixo.
   - Também dá para clicar no ＋ e depois na outra peça.
-- Passo 3: arrastar de um cartão elétrico para um mecânico (ou clicar num e no outro).
+- Passo 3: arrastar de um cartão elétrico (laranja) para um mecânico (roxo) (ou clicar num e no outro).
 - Apagar uma ligação: clicar no `×` a meio do fio. `Limpar` apaga as do passo atual.
 - `Dica`: até 3 por passo, progressivas. Cada uma custa um ponto.
 - `Verificar`: fios certos a verde ✓, errados a vermelho ✗, em falta a ponteado ?.
@@ -39,8 +39,8 @@ Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` 
 
 ## Trocar o conteúdo
 
-Tudo está em `data.js`. A árvore elétrica segue o board "3D Day – Jogo com fotos";
-a árvore mecânica e os BMKs `-Q1`, `-X1`, `-M1` são ilustrativos.
+Tudo está em `data.js`. As duas árvores seguem o board "3D Day – Jogo com fotos".
+Os BMKs `-Q1`, `-X1`, `-M1` e os nomes e descrições mecânicos (`LE001…`) são ilustrativos.
 
 - `articles`: peças concretas do fabricante (supplier.número), com os campos do FIO.
 - `nodes`: as peças das duas árvores. `kind` é `station`, `fu`, `bmk` ou `article`,
@@ -69,7 +69,6 @@ brancas. Para ficar só com o autocolante:
 python3 tools/crop_stickers.py      # img/*.png -> img/crop/*.png (precisa de Pillow)
 ```
 
-Os originais ficam intactos e os dados usam `crop/<nome>`. Imagens ainda em falta (lado
-mecânico ilustrativo): `robot_kuka`, `garra_robot`, `rolos_transportador`, `perfil_aluminio`.
+Os originais ficam intactos e os dados usam `crop/<nome>`.
 
 Antes de qualquer uso fora da empresa, confirmar os direitos de imagem dos fabricantes.
