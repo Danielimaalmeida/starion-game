@@ -61,6 +61,10 @@ Os BMKs `-Q1`, `-X1`, `-M1` e os nomes e descrições mecânicos (`LE001…`) s�
   do nível de cima para o de baixo; ligar peças do mesmo nível é permitido, mas conta
   como erro. Foto: `image` no próprio nó, ou a do seu `article`. Peças sem foto
   aparecem como etiqueta.
+- Propriedade: cada peça com foto mostra uma etiqueta (`config.showProperty`). Por omissão
+  é o `supplier`; um nó pode ter `prop` com outro valor. Peças que correspondem partilham-na,
+  e há iscos que também a partilham (a roda dentada `LE001.1.1` é SEW-Eurodrive como o motor).
+  Os suppliers Schunk, Rittal, Item e Neugart são ilustrativos.
 - `answerKey`: o gabarito do passo 3, pares `e` (elétrico) ↔ `m` (mecânico). Uma peça
   pode ter vários pares. Uma peça com foto fora do gabarito não tem par: ligá-la é erro.
 - `config`: pontuação, dicas, tamanho das peças nos passos 1 e 2 (`scale`, 0.8 = 20% mais pequenas), deriva (`drift`, `driftSpeed`), tempos de

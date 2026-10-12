@@ -38,6 +38,9 @@ window.FIO_DATA = {
     shuffle: true,            // shuffle card order inside each group in step 3
     hidePhotos: "none",       // step 3 only: "none" | "electrical" | "mechanical" (shows "?" until hover)
     showTimer: true,
+    // One property shown on every photo piece: the node's `prop` ({ pt, en } or text)
+    // if it has one, otherwise its supplier. Matching pieces share it; decoys do too.
+    showProperty: true,
     // Electric current along correct links (steps 1 and 3), as a hint: true = as soon as a
     // correct link is made; false = only after Check (answers fully hidden until then).
     currentOnLink: true,
@@ -76,7 +79,7 @@ window.FIO_DATA = {
     { id: "e-IR001", side: "electrical", kind: "fu", code: "+IR001", name: "Industrial Robot", parent: "e-ST001",
       description: "Industrial Robot", supplier: "Kuka", image: "crop/+IR001" },
     { id: "e-FG001", side: "electrical", kind: "bmk", code: ".FG001", name: "Gripper", parent: "e-IR001",
-      description: "Gripper", image: "crop/FG001" },
+      description: "Gripper", supplier: "Schunk", image: "crop/FG001" },   // supplier illustrative
     { id: "e-CR001", side: "electrical", kind: "bmk", code: ".CR001", name: "Process control robot", parent: "e-IR001",
       description: "Process control robot", supplier: "Kuka", image: "crop/CR001",
       note: { pt: "O controlador também é KUKA, mas só existe do lado elétrico: não tem par mecânico.",
@@ -85,7 +88,7 @@ window.FIO_DATA = {
     // FT001 (conveyor technology) > .CB001 (functional unit) > -Q1, -X1, -M1 (BMKs, invented) > articles
     { id: "e-FT001", side: "electrical", kind: "station", code: "FT001", name: "Conveyor technology", parent: null },
     { id: "e-CB001", side: "electrical", kind: "fu", code: ".CB001", name: "Cabinet Junction Box", parent: "e-FT001",
-      description: "Cabinet Junction Box", image: "crop/CB001" },
+      description: "Cabinet Junction Box", supplier: "Rittal", image: "crop/CB001" },   // supplier illustrative
     { id: "e-Q1",    side: "electrical", kind: "bmk", code: "-Q1", name: "Motor protection", parent: "e-CB001" },
     { id: "e-X1",    side: "electrical", kind: "bmk", code: "-X1", name: "Terminals", parent: "e-CB001" },
     { id: "e-M1",    side: "electrical", kind: "bmk", code: "-M1", name: "Conveyor motor", parent: "e-CB001" },
@@ -102,14 +105,15 @@ window.FIO_DATA = {
     // FT001 > LE001 (conveyor unit) > LE001.1 (gear unit) > LE001.1.1 / .1.2 / .1.3
     { id: "m-FT001",    side: "mechanical", kind: "station", code: "FT001", name: "Conveyor technology", parent: null },
     { id: "m-LE001",    side: "mechanical", kind: "fu", code: "LE001", name: "Conveyor unit", parent: "m-FT001",
-      description: "Conveyor unit (assembly)", image: "crop/LE001" },
+      description: "Conveyor unit (assembly)", supplier: "Item", image: "crop/LE001" },   // supplier illustrative
     { id: "m-LE001.1",  side: "mechanical", kind: "bmk", code: "LE001.1", name: "Gear unit", parent: "m-LE001",
-      description: "Gear unit (sub-assembly)", image: "crop/LE001.1" },
+      description: "Gear unit (sub-assembly)", supplier: "Neugart", image: "crop/LE001.1" },   // supplier illustrative
     { id: "m-LE001.1.1", side: "mechanical", kind: "article", code: "LE001.1.1", name: "Gear wheel with shaft", parent: "m-LE001.1",
-      description: "Gear wheel with shaft and base", image: "crop/LE001.1.1",
-      note: { pt: "A roda dentada só existe do lado mecânico.", en: "The gear wheel only exists on the mechanical side." } },
+      description: "Gear wheel with shaft and base", supplier: "SEW-Eurodrive", image: "crop/LE001.1.1",   // decoy: same supplier as the motor
+      note: { pt: "Também é SEW-Eurodrive, mas é uma roda dentada, não o motor: só existe do lado mecânico.",
+              en: "Also SEW-Eurodrive, but it is a gear wheel, not the motor: it only exists on the mechanical side." } },
     { id: "m-LE001.1.2", side: "mechanical", kind: "article", code: "LE001.1.2", name: "Gear housing", parent: "m-LE001.1",
-      description: "Cast gear housing", image: "crop/LE001.1.2",
+      description: "Cast gear housing", supplier: "Neugart", image: "crop/LE001.1.2",   // supplier illustrative
       note: { pt: "A carcaça só existe do lado mecânico.", en: "The housing only exists on the mechanical side." } },
     { id: "m-LE001.1.3", side: "mechanical", kind: "article", code: "LE001.1.3", name: "Geared motor with spindle", parent: "m-LE001.1",
       description: "Geared motor with spindle", supplier: "SEW-Eurodrive", image: "crop/LE001.1.3" }
@@ -158,6 +162,7 @@ window.FIO_DATA = {
         ["＋", "Puxa o ponto ＋ de uma peça até outra para as ligar. A ligação vai sempre do nível de cima para o de baixo."],
         ["✋", "Arrasta as peças para arrumar a árvore."],
         ["×", "Enganaste-te? Clica no × do fio para o apagar."],
+        ["🏷", "Cada peça mostra uma propriedade, o supplier. No passo 3, peças que são a mesma coisa têm o mesmo supplier, mas há iscos: confirma a foto e a descrição."],
         ["⚡", "Pista: se a ligação estiver certa, passa corrente elétrica no fio.", "current"],
         ["✓", "No fim de cada passo, carrega em Verificar: +1 por ligação certa, −1 por errada."]
       ],
@@ -169,7 +174,7 @@ window.FIO_DATA = {
       stepIntro: [
         null,
         { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica (BOM). Os códigos são outros, e a árvore também: conjunto → subconjunto → peças. Monta-a." },
-        { title: "Passo 3 · Relações", text: "Agora, o que o FIO faz sozinho: encontrar o que é a mesma peça nos dois lados. Liga cada cartão elétrico (laranja) ao mecânico (roxo) que lhe corresponde. Atenção: nem tudo tem par." }
+        { title: "Passo 3 · Relações", text: "Agora, o que o FIO faz sozinho: encontrar o que é a mesma peça nos dois lados. Liga cada cartão elétrico (laranja) ao mecânico (roxo) que lhe corresponde. A etiqueta do supplier ajuda, mas há iscos com o mesmo supplier, e nem tudo tem par." }
       ],
       introGo: "Vamos lá",
       stepNames: ["Elétrico", "Mecânico", "Relações"],
@@ -247,6 +252,7 @@ window.FIO_DATA = {
         ["＋", "Pull the ＋ dot of a piece to another to link them. A link always goes from the upper level to the lower one."],
         ["✋", "Drag pieces around to tidy up the tree."],
         ["×", "Made a mistake? Click the × on the thread to remove it."],
+        ["🏷", "Each piece shows one property, its supplier. In step 3, pieces that are the same thing share the supplier, but there are decoys: check the photo and the description too."],
         ["⚡", "Hint: if the link is right, electric current runs through the thread.", "current"],
         ["✓", "At the end of each step, press Check: +1 per correct link, −1 per wrong one."]
       ],
@@ -258,7 +264,7 @@ window.FIO_DATA = {
       stepIntro: [
         null,
         { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it (BOM). Different codes, and a different tree: assembly → sub-assembly → parts. Build it." },
-        { title: "Step 3 · Relations", text: "Now what the FIO does on its own: find what is the same part on both sides. Link each electrical card (orange) to the mechanical card (purple) that matches it. Careful: not everything has a partner." }
+        { title: "Step 3 · Relations", text: "Now what the FIO does on its own: find what is the same part on both sides. Link each electrical card (orange) to the mechanical card (purple) that matches it. The supplier tag helps, but some decoys share the supplier, and not everything has a partner." }
       ],
       introGo: "Let's go",
       stepNames: ["Electrical", "Mechanical", "Relations"],
