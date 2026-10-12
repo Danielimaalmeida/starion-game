@@ -121,6 +121,15 @@ window.FIO_DATA = {
              en: "The same SEW.R37DRN71M4 geared motor: an article on the electrical side, position LE001.1.3 on the mechanical side." } }
   ],
 
+  // Example shown on the "how it works" screen. Kept outside the game on purpose,
+  // so the explanation does not give away any answer.
+  rulesExample: [
+    { kind: "station", code: "ST020",      name: "Body shop – welding" },
+    { kind: "fu",      code: "+WR01",      name: "Welding robot" },
+    { kind: "bmk",     code: "-B5",        name: "Part present sensor" },
+    { kind: "article", code: "IFM.IGS208", name: "Inductive sensor M12" }
+  ],
+
   ui: {
     pt: {
       brandSub: "Factory Information Organizer",
@@ -132,6 +141,37 @@ window.FIO_DATA = {
         "Liga o que é a mesma coisa nas duas estruturas."
       ],
       start: "Começar",
+      rulesKicker: "Antes de começar",
+      rulesTitle: "Como funciona",
+      problemTitle: "O desafio",
+      problem: "Numa fábrica de automóveis, cada estação da linha é descrita duas vezes: pela engenharia elétrica, no ePlan, e pela engenharia mecânica, na lista de materiais (BOM). São as mesmas peças, em listas diferentes e com códigos diferentes. O FIO junta as duas estruturas e encontra sozinho o que corresponde a quê.",
+      levelsTitle: "Cada estrutura é uma árvore com níveis",
+      levels: {
+        station: ["Estação", "a zona da linha"],
+        fu: ["Functional unit", "agrupa por função"],
+        bmk: ["BMK", "o código que identifica cada elemento"],
+        article: ["Article", "a peça concreta do fabricante (supplier.número)"]
+      },
+      levelsNote: "Exemplo ilustrativo: as peças do jogo são outras.",
+      playTitle: "Como jogar",
+      play: [
+        ["＋", "Puxa o ponto ＋ de uma peça até outra para as ligar. A ligação vai sempre do nível de cima para o de baixo."],
+        ["✋", "Arrasta as peças para arrumar a árvore."],
+        ["×", "Enganaste-te? Clica no × do fio para o apagar."],
+        ["⚡", "Pista: se a ligação estiver certa, passa corrente elétrica no fio.", "current"],
+        ["✓", "No fim de cada passo, carrega em Verificar: +1 por ligação certa, −1 por errada."]
+      ],
+      stepsTitle: "3 passos",
+      stepsShort: ["Elétrico (ePlan): monta a árvore.", "Mecânico (BOM): monta a árvore.", "Relações: liga o que é a mesma peça nos dois lados."],
+      rulesGo: "Começar o passo 1",
+      rulesBack: "Voltar ao jogo",
+      help: "Como funciona",
+      stepIntro: [
+        null,
+        { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica (BOM). Os códigos são outros, e a árvore também: conjunto → subconjunto → peças. Monta-a." },
+        { title: "Passo 3 · Relações", text: "Agora, o que o FIO faz sozinho: encontrar o que é a mesma peça nos dois lados. Liga cada cartão elétrico (laranja) ao mecânico (roxo) que lhe corresponde. Atenção: nem tudo tem par." }
+      ],
+      introGo: "Vamos lá",
       stepNames: ["Elétrico", "Mecânico", "Relações"],
       electrical: "Elétrico (ePlan)",
       mechanical: "Mecânico (BOM)",
@@ -190,6 +230,37 @@ window.FIO_DATA = {
         "Link what is the same thing in both structures."
       ],
       start: "Start",
+      rulesKicker: "Before you start",
+      rulesTitle: "How it works",
+      problemTitle: "The challenge",
+      problem: "In a car factory, every station on the line is described twice: by electrical engineering, in ePlan, and by mechanical engineering, in the bill of materials (BOM). They are the same parts, in different lists and with different codes. The FIO brings both structures together and works out on its own what matches what.",
+      levelsTitle: "Each structure is a tree with levels",
+      levels: {
+        station: ["Station", "the area of the line"],
+        fu: ["Functional unit", "groups things by function"],
+        bmk: ["BMK", "the code that identifies each element"],
+        article: ["Article", "the concrete part from the manufacturer (supplier.number)"]
+      },
+      levelsNote: "Illustrative example: the game uses other parts.",
+      playTitle: "How to play",
+      play: [
+        ["＋", "Pull the ＋ dot of a piece to another to link them. A link always goes from the upper level to the lower one."],
+        ["✋", "Drag pieces around to tidy up the tree."],
+        ["×", "Made a mistake? Click the × on the thread to remove it."],
+        ["⚡", "Hint: if the link is right, electric current runs through the thread.", "current"],
+        ["✓", "At the end of each step, press Check: +1 per correct link, −1 per wrong one."]
+      ],
+      stepsTitle: "3 steps",
+      stepsShort: ["Electrical (ePlan): build the tree.", "Mechanical (BOM): build the tree.", "Relations: link what is the same part on both sides."],
+      rulesGo: "Start step 1",
+      rulesBack: "Back to the game",
+      help: "How it works",
+      stepIntro: [
+        null,
+        { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it (BOM). Different codes, and a different tree: assembly → sub-assembly → parts. Build it." },
+        { title: "Step 3 · Relations", text: "Now what the FIO does on its own: find what is the same part on both sides. Link each electrical card (orange) to the mechanical card (purple) that matches it. Careful: not everything has a partner." }
+      ],
+      introGo: "Let's go",
       stepNames: ["Electrical", "Mechanical", "Relations"],
       electrical: "Electrical (ePlan)",
       mechanical: "Mechanical (BOM)",

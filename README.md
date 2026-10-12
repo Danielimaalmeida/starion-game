@@ -20,6 +20,15 @@ chrome --kiosk --app=file:///CAMINHO/PARA/starion-game/index.html
 
 Tecla `F` alterna ecrã inteiro. Idioma: `index.html?lang=en` (ou `config.lang` em `data.js`).
 
+## Fluxo
+
+1. Ecrã inicial (volta-se aqui ao fim de 60 s sem interação).
+2. "Como funciona": o desafio de negócio (a mesma estação no ePlan e na BOM), os níveis
+   da árvore com um exemplo fictício (`rulesExample` em `data.js`, para não dar respostas)
+   e as regras. O cronómetro só começa ao fechar este ecrã.
+3. Passo 1, depois um cartão curto antes dos passos 2 e 3 a explicar o que muda.
+   O botão `?` no cabeçalho reabre o "Como funciona" sem perder o jogo.
+
 ## Como se joga (rato)
 
 - Passos 1 e 2: as peças flutuam devagar. Param quando o rato está em cima, quando são
