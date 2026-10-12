@@ -69,7 +69,7 @@ brancas. Para ficar só com o autocolante:
 python3 tools/crop_stickers.py      # img/*.png -> img/crop/*.png (precisa de Pillow)
 ```
 
-Os originais ficam intactos e os dados usam `crop/<nome>`. Imagens já em falta (lado
+Os originais ficam intactos e os dados usam `crop/<nome>`. Imagens ainda em falta (lado
 mecânico ilustrativo): `robot_kuka`, `garra_robot`, `rolos_transportador`, `perfil_aluminio`.
 
 Antes de qualquer uso fora da empresa, confirmar os direitos de imagem dos fabricantes.
