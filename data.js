@@ -41,6 +41,11 @@ window.FIO_DATA = {
     // One property shown on every photo piece: the node's `prop` ({ pt, en } or text)
     // if it has one, otherwise its supplier. Matching pieces share it; decoys do too.
     showProperty: true,
+    // Master string (the full path of a node, e.g. ++FT001.CB001-M1|SEW.R37DRN71M4) in the
+    // detail panel. It gives away the parent, so in steps 1 and 2 it only shows after Check
+    // ("afterCheck"); "always" shows it from the start. Step 3 always shows it.
+    // A node may set `masterString` to override the computed one.
+    showMasterString: "afterCheck",
     // Hint on correct links: electric current (steps 1 and 3) or turning gears (step 2).
     // true = as soon as a correct link is made; false = only after Check.
     currentOnLink: true,
@@ -75,7 +80,7 @@ window.FIO_DATA = {
   nodes: [
     // ================= electrical tree (as on the board) =================
     // ST001 (station) > +IR001 (functional unit) > .FG001, .CR001 (BMKs)
-    { id: "e-ST001", side: "electrical", kind: "station", code: "ST001", name: "Station", parent: null },
+    { id: "e-ST001", side: "electrical", kind: "fg", code: "++ST001", name: "Station", parent: null },
     { id: "e-IR001", side: "electrical", kind: "fu", code: "+IR001", name: "Industrial Robot", parent: "e-ST001",
       description: "Industrial Robot", supplier: "Kuka", image: "crop/+IR001" },
     { id: "e-FG001", side: "electrical", kind: "bmk", code: ".FG001", name: "Gripper", parent: "e-IR001",
@@ -86,7 +91,7 @@ window.FIO_DATA = {
               en: "The controller is KUKA too, but it only exists on the electrical side: no mechanical partner." } },
 
     // FT001 (conveyor technology) > .CB001 (functional unit) > -Q1, -X1, -M1 (BMKs, invented) > articles
-    { id: "e-FT001", side: "electrical", kind: "station", code: "FT001", name: "Conveyor technology", parent: null },
+    { id: "e-FT001", side: "electrical", kind: "fg", code: "++FT001", name: "Conveyor technology", parent: null },
     { id: "e-CB001", side: "electrical", kind: "fu", code: ".CB001", name: "Cabinet Junction Box", parent: "e-FT001",
       description: "Cabinet Junction Box", supplier: "Rittal", image: "crop/CB001" },   // supplier illustrative
     { id: "e-Q1",    side: "electrical", kind: "bmk", code: "-Q1", name: "Motor protection", parent: "e-CB001" },
@@ -144,7 +149,7 @@ window.FIO_DATA = {
   // Example shown on the "how it works" screen. Kept outside the game on purpose,
   // so the explanation does not give away any answer.
   rulesExample: [
-    { kind: "station", code: "ST020",      name: "Body shop – welding" },
+    { kind: "fg",      code: "++ST020",    name: "Body shop – welding" },
     { kind: "fu",      code: "+WR01",      name: "Welding robot" },
     { kind: "bmk",     code: "-B5",        name: "Part present sensor" },
     { kind: "article", code: "IFM.IGS208", name: "Inductive sensor M12" }
@@ -170,12 +175,13 @@ window.FIO_DATA = {
       problem: "Numa fábrica de automóveis, cada estação da linha é descrita duas vezes: pela engenharia elétrica, no ePlan, e pela engenharia mecânica, nas listas de materiais (BOMs) e no Layout file, que define os elementos de layout (LE). São as mesmas peças, em ficheiros diferentes e com códigos diferentes. O FIO junta as duas estruturas e encontra sozinho o que corresponde a quê.",
       levelsTitle: "Cada estrutura é uma árvore com níveis",
       levels: {
-        station: ["Estação", "a zona da linha"],
+        fg: ["Functional group", "o primeiro nível, com código ++"],
         fu: ["Functional unit", "agrupa por função"],
         bmk: ["BMK", "o código que identifica cada elemento"],
         article: ["Article", "a peça concreta do fabricante (supplier.número)"]
       },
       levelsNote: "Exemplo ilustrativo: as peças do jogo são outras.",
+      masterNote: m => "Master string: cada peça junta o seu código ao do pai (o article com |), ex. " + m + ".",
       playTitle: "Como jogar",
       play: [
         ["＋", "Puxa o ponto ＋ de uma peça até outra para as ligar. A ligação vai sempre do nível de cima para o de baixo."],
@@ -192,7 +198,7 @@ window.FIO_DATA = {
       help: "Como funciona",
       stepIntro: [
         null,
-        { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica. Aqui não há estações: no topo estão os layout elements (LE…), que vêm do Layout file, e por baixo as peças das BOMs, com códigos que continuam o do pai (LE001 → LE001.1 → LE001.1.1). Ligação certa? As engrenagens começam a rodar." },
+        { title: "Passo 2 · Mecânico", text: "A mesma linha, agora vista pela engenharia mecânica. Aqui não há functional groups: no topo estão os layout elements (LE…), que vêm do Layout file, e por baixo as peças das BOMs, com códigos que continuam o do pai (LE001 → LE001.1 → LE001.1.1). Ligação certa? As engrenagens começam a rodar." },
         { title: "Passo 3 · Relações", text: "Agora, o que o FIO faz sozinho: encontrar o que é a mesma peça nos dois lados. Liga cada cartão elétrico (laranja) ao mecânico (roxo) que lhe corresponde. A etiqueta do supplier ajuda, mas há iscos com o mesmo supplier, e nem tudo tem par." }
       ],
       introGo: "Vamos lá",
@@ -200,8 +206,9 @@ window.FIO_DATA = {
       electrical: "Elétrico (ePlan)",
       mechanical: "Mecânico (BOM + Layout)",
       sideWord: { electrical: "elétrico", mechanical: "mecânico" },
-      kindWord: { station: "estação", fu: "functional unit", bmk: "BMK", article: "article", le: "layout element", part: "peça da BOM" },
+      kindWord: { fg: "functional group", station: "estação", fu: "functional unit", bmk: "BMK", article: "article", le: "layout element", part: "peça da BOM" },
       kindInfo: {
+        fg: "Functional group (++): o primeiro nível da estrutura elétrica. Agrupa as functional units.",
         station: "Estação: a raiz da árvore. Agrupa as functional units.",
         fu: "Functional unit: agrupa os BMKs por função.",
         bmk: "BMK: objeto identificado por um código.",
@@ -236,7 +243,7 @@ window.FIO_DATA = {
       hint3: "É o cartão que está a brilhar.",
       hintNone: "Já usaste todas as dicas.",
       hintDone: "Já não há nada por descobrir.",
-      fields: { description: "Standard Description", subgroup: "Subgroup", supplier: "Supplier Name", type: "Type Designation" },
+      fields: { master: "Master string", description: "Standard Description", subgroup: "Subgroup", supplier: "Supplier Name", type: "Type Designation" },
       fioTitle: "Isto o FIO faz sozinho",
       fioText: "O FIO lê os exports do ePlan, das BOMs e do Layout file, organiza as estruturas e encontra estas relações automaticamente.",
       you: "Tu", fioLabel: "FIO",
@@ -265,12 +272,13 @@ window.FIO_DATA = {
       problem: "In a car factory, every station on the line is described twice: by electrical engineering, in ePlan, and by mechanical engineering, in the bills of materials (BOMs) and the Layout file, which defines the layout elements (LE). They are the same parts, in different files and with different codes. The FIO brings both structures together and works out on its own what matches what.",
       levelsTitle: "Each structure is a tree with levels",
       levels: {
-        station: ["Station", "the area of the line"],
+        fg: ["Functional group", "the first level, coded ++"],
         fu: ["Functional unit", "groups things by function"],
         bmk: ["BMK", "the code that identifies each element"],
         article: ["Article", "the concrete part from the manufacturer (supplier.number)"]
       },
       levelsNote: "Illustrative example: the game uses other parts.",
+      masterNote: m => "Master string: each piece appends its code to its parent's (the article with |), e.g. " + m + ".",
       playTitle: "How to play",
       play: [
         ["＋", "Pull the ＋ dot of a piece to another to link them. A link always goes from the upper level to the lower one."],
@@ -287,7 +295,7 @@ window.FIO_DATA = {
       help: "How it works",
       stepIntro: [
         null,
-        { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it. There are no stations here: the layout elements (LE…) from the Layout file are at the top, and the BOM items hang below them, with codes that extend the parent's (LE001 → LE001.1 → LE001.1.1). Right link? The gears start turning." },
+        { title: "Step 2 · Mechanical", text: "The same line, now as mechanical engineering sees it. There are no functional groups here: the layout elements (LE…) from the Layout file are at the top, and the BOM items hang below them, with codes that extend the parent's (LE001 → LE001.1 → LE001.1.1). Right link? The gears start turning." },
         { title: "Step 3 · Relations", text: "Now what the FIO does on its own: find what is the same part on both sides. Link each electrical card (orange) to the mechanical card (purple) that matches it. The supplier tag helps, but some decoys share the supplier, and not everything has a partner." }
       ],
       introGo: "Let's go",
@@ -295,8 +303,9 @@ window.FIO_DATA = {
       electrical: "Electrical (ePlan)",
       mechanical: "Mechanical (BOM + Layout)",
       sideWord: { electrical: "electrical", mechanical: "mechanical" },
-      kindWord: { station: "station", fu: "functional unit", bmk: "BMK", article: "article", le: "layout element", part: "BOM item" },
+      kindWord: { fg: "functional group", station: "station", fu: "functional unit", bmk: "BMK", article: "article", le: "layout element", part: "BOM item" },
       kindInfo: {
+        fg: "Functional group (++): the first level of the electrical structure. It groups functional units.",
         station: "Station: the root of the tree. It groups functional units.",
         fu: "Functional unit: groups BMKs by function.",
         bmk: "BMK: an object identified by a code.",
@@ -331,7 +340,7 @@ window.FIO_DATA = {
       hint3: "It is the glowing card.",
       hintNone: "You have used all your hints.",
       hintDone: "There is nothing left to find.",
-      fields: { description: "Standard Description", subgroup: "Subgroup", supplier: "Supplier Name", type: "Type Designation" },
+      fields: { master: "Master string", description: "Standard Description", subgroup: "Subgroup", supplier: "Supplier Name", type: "Type Designation" },
       fioTitle: "The FIO does this on its own",
       fioText: "The FIO reads the ePlan, BOM and Layout file exports, organises the structures and finds these relations automatically.",
       you: "You", fioLabel: "FIO",

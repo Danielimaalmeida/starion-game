@@ -83,7 +83,7 @@
   .piece .code.long { font-size: calc(var(--u) * 1.9); white-space: normal; overflow-wrap: anywhere; }
   .piece.pill { padding: calc(var(--u) * 1.1) calc(var(--u) * 2.4) calc(var(--u) * 1.9); border-radius: calc(var(--u) * 1.3); font-weight: 800; white-space: nowrap;
                               box-shadow: 0 calc(var(--u) * .4) calc(var(--u) * 1.2) rgba(15,27,45,.2); }
-  .piece.pill.station, .piece.pill.le { background: var(--navy); color: #fff; font-size: calc(var(--u) * 2.9); }
+  .piece.pill.station, .piece.pill.fg, .piece.pill.le { background: var(--navy); color: #fff; font-size: calc(var(--u) * 2.9); }
   .piece.pill.fu { background: var(--tint); color: var(--accent); border: calc(var(--u) * .35) solid var(--accent); font-size: calc(var(--u) * 2.5); }
   .piece.pill.bmk, .piece.pill.article, .piece.pill.part { background: #fff; color: var(--ink); border: calc(var(--u) * .3) dashed var(--accent); font-size: calc(var(--u) * 2.3);
                                          font-family: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", monospace; }
@@ -182,6 +182,8 @@
   #info .fields { display: grid; grid-template-columns: 1.6fr 1fr; gap: calc(var(--u) * .2) calc(var(--u) * 2.4); margin-top: calc(var(--u) * .5); font-size: calc(var(--u) * 1.9); }
   #info .fields span { color: var(--muted); }
   #info .fields div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #info .master { margin-top: calc(var(--u) * .3); font-size: calc(var(--u) * 1.95); color: var(--ink); }
+  #info .master span { color: var(--muted); font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif; }
   #info .why { font-size: calc(var(--u) * 2.4); font-weight: 600; }
   #info .why.ok { color: var(--ok); } #info .why.bad { color: var(--bad); } #info .why.miss { color: var(--warn); }
 
@@ -215,7 +217,7 @@
                         height: calc(var(--u) * 4.4); border-left: calc(var(--u) * .3) solid rgba(255,255,255,.45);
                         border-bottom: calc(var(--u) * .3) solid rgba(255,255,255,.45); border-bottom-left-radius: calc(var(--u) * 1.2); }
   .lvl .tag { flex: none; padding: calc(var(--u) * .6) calc(var(--u) * 1.5); border-radius: calc(var(--u) * 1); font-weight: 800; font-size: calc(var(--u) * 2); white-space: nowrap; }
-  .tag.station { background: #fff; color: var(--navy); }
+  .tag.station, .tag.fg { background: #fff; color: var(--navy); }
   .tag.fu { background: var(--e-tint); color: var(--e); border: calc(var(--u) * .3) solid var(--e); }
   .tag.bmk { color: #fff; border: calc(var(--u) * .3) dashed #f3a37f; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
   .tag.article { background: #fff; color: var(--ink); font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
@@ -348,6 +350,24 @@
   function propOf(n) { return cfg.showProperty ? (n.prop ? L(n.prop) : supplierOf(n)) : ""; }
   function propEl(n) { var v = propOf(n); return v ? make("div", "prop", v) : null; }
   function supplierOf(n) { return n.supplier || (art(n) ? art(n).supplier : "") || ""; }
+  // Master string: the parent's master string + this code. Codes that already extend the parent's
+  // (LE001 -> LE001.1) are taken as they are; an article joins with "|", a "-" code brings its own
+  // separator, anything else joins with "." (a leading + or . of the code becomes that ".").
+  function joinMaster(pm, pcode, code, kind) {
+    if (pcode && code.indexOf(pcode) === 0) return pm + code.slice(pcode.length);
+    if (kind === "article") return pm + "|" + code;
+    if (code.charAt(0) === "-") return pm + code;
+    return pm + "." + code.replace(/^[+.]+/, "");
+  }
+  var masterCache = {};
+  function masterOf(n) {
+    if (n.masterString) return n.masterString;
+    if (!masterCache[n.id]) {
+      var p = n.parent && nodeById[n.parent];
+      masterCache[n.id] = p ? joinMaster(masterOf(p), p.code, n.code, n.kind) : n.code;
+    }
+    return masterCache[n.id];
+  }
   function rootOf(n) { while (n.parent && nodeById[n.parent]) n = nodeById[n.parent]; return n; }
 
   // ---------- helpers ----------
@@ -854,6 +874,10 @@
     var t = make("div", "ititle mono", a && a.title !== n.code ? n.code + "  ·  " + a.title : n.code);
     t.appendChild(make("small", null, n.name + "  ·  " + T.kindWord[n.kind]));
     body.appendChild(t);
+    if (type() === "relate" || mode !== "play" || cfg.showMasterString === "always") {
+      var ms = make("div", "master mono"); ms.appendChild(make("span", null, T.fields.master + ": ")); ms.appendChild(document.createTextNode(masterOf(n)));
+      body.appendChild(ms);
+    }
     if (a) {
       row(T.fields.description, a.description); row(T.fields.supplier, a.supplier);
       row(T.fields.subgroup, a.subgroupNumber + " – " + a.subgroup); row(T.fields.type, a.typeDesignation);
@@ -1122,7 +1146,12 @@
   });
   $("rKicker").textContent = T.rulesKicker; $("rTitle").textContent = T.rulesTitle;
   $("rProblemT").textContent = T.problemTitle; $("rProblem").textContent = T.problem;
-  $("rLevelsT").textContent = T.levelsTitle; $("rNote").textContent = T.levelsNote;
+  $("rLevelsT").textContent = T.levelsTitle;
+  (function () {   // master string of the example's last level, built with the same rule as the game
+    var ex = D.rulesExample || [], m = "", prev = null;
+    ex.forEach(function (n) { m = prev ? joinMaster(m, prev.code, n.code, n.kind) : n.code; prev = n; });
+    $("rNote").textContent = T.levelsNote + " " + (m && T.masterNote ? T.masterNote(m) : "");
+  })();
   (D.rulesExample || []).forEach(function (ex, i) {
     var row = make("div", "lvl"), lv = T.levels[ex.kind] || [ex.kind, ""], desc = make("div", "desc");
     row.style.marginLeft = "calc(var(--u) * " + (i * 4.2) + ")";

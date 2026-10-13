@@ -3,7 +3,7 @@
 Jogo local, sem internet, para o stand do 3D Day. Em três passos, o visitante faz o
 que o FIO faz automaticamente:
 
-1. **Elétrico**: monta a árvore elétrica (estação → functional unit → BMK → article).
+1. **Elétrico**: monta a árvore elétrica (functional group `++` → functional unit → BMK → article).
 2. **Mecânico**: monta a árvore mecânica.
 3. **Relações**: liga cada BMK elétrico ao mecânico que usa o mesmo article.
    No fim, "Tu vs. FIO" mostra o FIO a encontrar as relações sozinho.
@@ -65,7 +65,8 @@ um pedestal que o elétrico não tem; fotos espelhadas em `img/variant/`) e os n
 são ilustrativos.
 
 - `articles`: peças concretas do fabricante (supplier.número), com os campos do FIO.
-- `nodes`: as peças das duas árvores. No elétrico, `kind` é `station`, `fu`, `bmk` ou `article`.
+- `nodes`: as peças das duas árvores. No elétrico, `kind` é `fg` (functional group, código `++`),
+  `fu`, `bmk` ou `article`.
   Na mecânica não há estações: as raízes são layout elements (`le`, do Layout file) e por baixo
   estão as peças das BOMs (`part`), com códigos que continuam o do pai (LE001 → LE001.1 → LE001.1.1).
   Em ambos,
@@ -77,6 +78,11 @@ são ilustrativos.
   é o `supplier`; um nó pode ter `prop` com outro valor. Peças que correspondem partilham-na,
   e há iscos que também a partilham (a roda dentada `LE001.1.1` é SEW-Eurodrive como o motor).
   Os suppliers Schunk, Rittal, Item e Neugart são ilustrativos.
+- Master string: o caminho completo de cada peça, calculado a partir dos códigos (o do pai + o
+  seu; `-` traz o seu próprio separador, os outros juntam com `.`, o article com `|`; os códigos
+  LE já contêm o caminho). Ex.: `++FT001.CB001-M1|SEW.R37DRN71M4`. Aparece no painel de detalhe;
+  nos passos 1 e 2 só depois de Verificar, porque revela o pai (`config.showMasterString`).
+  Um nó pode ter `masterString` para a definir à mão.
 - `answerKey`: o gabarito do passo 3, pares `e` (elétrico) ↔ `m` (mecânico). Uma peça
   pode ter vários pares. Uma peça com foto fora do gabarito não tem par: ligá-la é erro.
 - `config`: pontuação, dicas, tamanho das peças nos passos 1 e 2 (`scale`, 0.8 = 20% mais pequenas), deriva (`drift`, `driftSpeed`), tempos de
