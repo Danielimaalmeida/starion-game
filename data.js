@@ -116,29 +116,32 @@ window.FIO_DATA = {
     // The mechanical side has no stations: layout elements (LE…, from the Layout file) are
     // the roots, and BOM positions hang below them with codes that extend the parent's
     // (LE002 > LE002.1 > LE002.1.1). Robot branch: the gripper hangs under the robot and
-    // LE002.2 pedestal has no electrical twin. Codes illustrative; photos mirrored in img/variant/.
+    // LE002.2 pedestal has no electrical twin. Codes illustrative; robot and gripper photos
+    // mirrored in img/variant/.
     { id: "m-LE002",     side: "mechanical", kind: "le", code: "LE002", name: "Robot cell", parent: null },
     { id: "m-LE002.1",   side: "mechanical", kind: "part", code: "LE002.1", name: "Robot, mechanical unit", parent: "m-LE002",
       description: "6-axis robot arm (mechanical unit)", supplier: "Kuka", image: "variant/LE002.1" },
     { id: "m-LE002.1.1", side: "mechanical", kind: "part", code: "LE002.1.1", name: "Gripper on flange", parent: "m-LE002.1",
       description: "Gripper, mounted on the robot flange", supplier: "Schunk", image: "variant/LE002.1.1" },
     { id: "m-LE002.2",   side: "mechanical", kind: "part", code: "LE002.2", name: "Robot pedestal", parent: "m-LE002",
-      note: { pt: "O pedestal só existe do lado mecânico.", en: "The pedestal only exists on the mechanical side." } },
+      description: "Welded steel pedestal for the robot", supplier: "Kuka", image: "variant/LE002.2",   // sticker made from a photo (img/source/)
+      note: { pt: "Também é Kuka, mas o pedestal só existe do lado mecânico.", en: "Also Kuka, but the pedestal only exists on the mechanical side." } },
 
-    // LE001 (conveyor unit) > LE001.1 (gear unit) > LE001.1.1 / .1.2 / .1.3
-    { id: "m-LE001",    side: "mechanical", kind: "le", code: "LE001", name: "Conveyor unit", parent: null,
+    // LE001 (conveyor unit) > LE001.1 (geared motor) > LE001.1.1 (gear unit) > LE001.1.1.1 / .1.1.2
+    // Image files keep the board's original names.
+    { id: "m-LE001",       side: "mechanical", kind: "le", code: "LE001", name: "Conveyor unit", parent: null,
       description: "Conveyor unit (assembly)", supplier: "Item", image: "crop/LE001" },   // supplier illustrative
-    { id: "m-LE001.1",  side: "mechanical", kind: "part", code: "LE001.1", name: "Gear unit", parent: "m-LE001",
+    { id: "m-LE001.1",     side: "mechanical", kind: "part", code: "LE001.1", name: "Geared motor with spindle", parent: "m-LE001",
+      description: "Geared motor with spindle", supplier: "SEW-Eurodrive", image: "crop/LE001.1.3" },
+    { id: "m-LE001.1.1",   side: "mechanical", kind: "part", code: "LE001.1.1", name: "Gear unit", parent: "m-LE001.1",
       description: "Gear unit (sub-assembly)", supplier: "Neugart", image: "crop/LE001.1" },   // supplier illustrative
-    { id: "m-LE001.1.1", side: "mechanical", kind: "part", code: "LE001.1.1", name: "Gear wheel with shaft", parent: "m-LE001.1",
+    { id: "m-LE001.1.1.1", side: "mechanical", kind: "part", code: "LE001.1.1.1", name: "Gear wheel with shaft", parent: "m-LE001.1.1",
       description: "Gear wheel with shaft and base", supplier: "SEW-Eurodrive", image: "crop/LE001.1.1",   // decoy: same supplier as the motor
       note: { pt: "Também é SEW-Eurodrive, mas é uma roda dentada, não o motor: só existe do lado mecânico.",
               en: "Also SEW-Eurodrive, but it is a gear wheel, not the motor: it only exists on the mechanical side." } },
-    { id: "m-LE001.1.2", side: "mechanical", kind: "part", code: "LE001.1.2", name: "Gear housing", parent: "m-LE001.1",
+    { id: "m-LE001.1.1.2", side: "mechanical", kind: "part", code: "LE001.1.1.2", name: "Gear housing", parent: "m-LE001.1.1",
       description: "Cast gear housing", supplier: "Neugart", image: "crop/LE001.1.2",   // supplier illustrative
-      note: { pt: "A carcaça só existe do lado mecânico.", en: "The housing only exists on the mechanical side." } },
-    { id: "m-LE001.1.3", side: "mechanical", kind: "part", code: "LE001.1.3", name: "Geared motor with spindle", parent: "m-LE001.1",
-      description: "Geared motor with spindle", supplier: "SEW-Eurodrive", image: "crop/LE001.1.3" }
+      note: { pt: "A carcaça só existe do lado mecânico.", en: "The housing only exists on the mechanical side." } }
   ],
 
   answerKey: [
@@ -147,9 +150,9 @@ window.FIO_DATA = {
              en: "The same KUKA robot: functional unit +IR001 on the electrical side, position LE002.1 on the mechanical side, with another code and in another place of the tree." } },
     { e: "e-FG001", m: "m-LE002.1.1",
       why: { pt: "A mesma garra Schunk: no mecânico está montada no robot (LE002.1.1).", en: "The same Schunk gripper: on the mechanical side it is mounted on the robot (LE002.1.1)." } },
-    { e: "e-SEW", m: "m-LE001.1.3",
-      why: { pt: "O mesmo motorredutor SEW.R37DRN71M4: no elétrico é o article, no mecânico é a posição LE001.1.3.",
-             en: "The same SEW.R37DRN71M4 geared motor: an article on the electrical side, position LE001.1.3 on the mechanical side." } }
+    { e: "e-SEW", m: "m-LE001.1",
+      why: { pt: "O mesmo motorredutor SEW.R37DRN71M4: no elétrico é o article, no mecânico é a posição LE001.1, logo abaixo do conveyor.",
+             en: "The same SEW.R37DRN71M4 geared motor: an article on the electrical side, position LE001.1 on the mechanical side, right below the conveyor." } }
   ],
 
   // Example shown on the "how it works" screen. Kept outside the game on purpose,

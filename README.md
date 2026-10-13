@@ -78,7 +78,7 @@ Tecla `F` alterna ecrã inteiro. Idioma: botões **Português / English** no ecr
 
 Tudo está em `data.js`. As duas árvores seguem o board "3D Day – Jogo com fotos".
 Os BMKs `-Q1`, `-X1`, `-M1`, o ramo mecânico do robot (`LE002…`: a garra fica montada no robot e há
-um pedestal que o elétrico não tem; fotos espelhadas em `img/variant/`) e os nomes e descrições mecânicos (`LE001…`)
+um pedestal que o elétrico não tem; fotos espelhadas e o sticker do pedestal em `img/variant/`) e os nomes e descrições mecânicos (`LE001…`)
 são ilustrativos.
 
 - `articles`: peças concretas do fabricante (supplier.número), com os campos do FIO.
@@ -93,7 +93,7 @@ são ilustrativos.
   aparecem como etiqueta.
 - Propriedade: cada peça com foto mostra uma etiqueta (`config.showProperty`). Por omissão
   é o `supplier`; um nó pode ter `prop` com outro valor. Peças que correspondem partilham-na,
-  e há iscos que também a partilham (a roda dentada `LE001.1.1` é SEW-Eurodrive como o motor).
+  e há iscos que também a partilham (a roda dentada `LE001.1.1.1` é SEW-Eurodrive como o motor, o pedestal é Kuka como o robot).
   Os suppliers Schunk, Rittal, Item e Neugart são ilustrativos.
 - Master string: o caminho completo de cada peça, calculado a partir dos códigos (o do pai + o
   seu; `-` traz o seu próprio separador, os outros juntam com `.`, o article com `|`; os códigos
@@ -123,5 +123,19 @@ python3 tools/crop_stickers.py      # img/*.png -> img/crop/*.png (precisa de Pi
 ```
 
 Os originais ficam intactos e os dados usam `crop/<nome>`.
+
+Na árvore mecânica, os ficheiros das fotos mantêm os nomes do board, mas a hierarquia mudou:
+o motor (`crop/LE001.1.3`) é agora `LE001.1`, pai da gear unit (`crop/LE001.1`, agora `LE001.1.1`),
+que tem a roda dentada e a carcaça (`LE001.1.1.1` e `LE001.1.1.2`).
+
+Para fazer um sticker a partir de uma foto (recorta o objeto, contorno branco e sombra):
+
+```
+pip install opencv-python-headless pillow
+python3 tools/make_sticker.py img/source/FOTO.png img/variant/CODIGO.png X Y L A
+```
+
+`X Y L A` é um retângulo à volta do objeto, em píxeis da foto. Exemplo: o pedestal
+(`img/source/LE002.2.png` → `img/variant/LE002.2.png`, retângulo `62 72 505 408`).
 
 Antes de qualquer uso fora da empresa, confirmar os direitos de imagem dos fabricantes.

@@ -116,9 +116,14 @@
                border: calc(var(--u) * .25) solid #d5dbe5; border-radius: calc(var(--u) * 1.3); box-shadow: 0 calc(var(--u) * .2) calc(var(--u) * .6) rgba(15,27,45,.1); }
   .piece.rel.electrical { border-left: calc(var(--u) * 1) solid var(--e); }
   .piece.rel.mechanical { border-right: calc(var(--u) * 1) solid var(--m); flex-direction: row-reverse; text-align: right; }
-  .piece.rel .ph { flex: none; height: calc(var(--u) * 8.4); width: calc(var(--u) * 8.4); }
-  .piece.rel .txt { min-width: 0; flex: 1; pointer-events: none; }
-  .piece.rel .code { font-size: calc(var(--u) * 2.7); } .piece.rel .nm { font-size: calc(var(--u) * 1.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .piece.rel .ph { flex: none; align-self: stretch; height: auto; width: auto; aspect-ratio: 1; max-height: calc(var(--u) * 8.4); margin: auto 0; }
+  .piece.rel .txt { min-width: 0; flex: 1; pointer-events: none; display: flex; flex-direction: column; gap: calc(var(--u) * .35); }
+  .piece.rel .code { font-size: calc(var(--u) * 2.7); line-height: 1.1; }
+  .piece.rel .code.long { font-size: calc(var(--u) * 2); }
+  .piece.rel .sub { display: flex; align-items: center; gap: calc(var(--u) * .9); min-width: 0; }
+  .piece.rel.mechanical .sub { justify-content: flex-end; }
+  .piece.rel .nm { font-size: calc(var(--u) * 1.8); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .piece.rel .prop { flex: none; margin-top: 0; }
   .piece.rel:hover { border-color: #9aa7ba; }
   .dot { position: absolute; top: 50%; width: calc(var(--u) * 2); height: calc(var(--u) * 2); margin-top: calc(var(--u) * -1); border-radius: 50%;
          background: #fff; border: calc(var(--u) * .35) solid currentColor; pointer-events: none; }
@@ -628,8 +633,10 @@
           var n = make("div", "piece rel " + c.kind + " " + side); n.dataset.id = c.id;
           if (cfg.hidePhotos === side) n.classList.add("nophoto");
           var ph = make("div", "ph"); ph.appendChild(thumb(imageOf(c), "thumb"));
-          var txt = make("div", "txt"); txt.appendChild(codeEl(c)); txt.appendChild(make("div", "nm", c.name));
-          var pr = propEl(c); if (pr) txt.appendChild(pr);
+          // name and property share one line, so a card stays two lines tall however many there are
+          var txt = make("div", "txt"), sub = make("div", "sub"); txt.appendChild(codeEl(c)); txt.appendChild(sub);
+          sub.appendChild(make("div", "nm", c.name));
+          var pr = propEl(c); if (pr) sub.appendChild(pr);
           n.appendChild(ph); n.appendChild(txt); n.appendChild(make("i", "dot"));
           els[c.id] = n; list.appendChild(n);
         });
