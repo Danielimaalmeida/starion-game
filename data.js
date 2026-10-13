@@ -44,10 +44,10 @@ window.FIO_DATA = {
     // if it has one, otherwise its supplier. Matching pieces share it; decoys do too.
     showProperty: true,
     // Master string (the full path of a node, e.g. ++FT001.CB001-M1|SEW.R37DRN71M4) in the
-    // detail panel. It gives away the parent, so in steps 1 and 2 it only shows after Check
-    // ("afterCheck"); "always" shows it from the start. Step 3 always shows it.
+    // detail panel. "always" shows it from the start; it gives away the parent, so
+    // "afterCheck" hides it in steps 1 and 2 until Check. Step 3 always shows it.
     // A node may set `masterString` to override the computed one.
-    showMasterString: "afterCheck",
+    showMasterString: "always",
     // Scoreboard: saved in this browser (localStorage), shown at the end and from the welcome
     // screen. Double-click its title for the organiser tools (export CSV, clear).
     scoreboardTop: 10,

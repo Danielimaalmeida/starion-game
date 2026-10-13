@@ -97,8 +97,9 @@ são ilustrativos.
   Os suppliers Schunk, Rittal, Item e Neugart são ilustrativos.
 - Master string: o caminho completo de cada peça, calculado a partir dos códigos (o do pai + o
   seu; `-` traz o seu próprio separador, os outros juntam com `.`, o article com `|`; os códigos
-  LE já contêm o caminho). Ex.: `++FT001.CB001-M1|SEW.R37DRN71M4`. Aparece no painel de detalhe;
-  nos passos 1 e 2 só depois de Verificar, porque revela o pai (`config.showMasterString`).
+  LE já contêm o caminho). Ex.: `++FT001.CB001-M1|SEW.R37DRN71M4`. Aparece no painel de detalhe,
+  sempre, em todos os passos. Como revela o pai, `config.showMasterString: "afterCheck"` esconde-a nos
+  passos 1 e 2 até Verificar.
   Um nó pode ter `masterString` para a definir à mão.
 - `answerKey`: o gabarito do passo 3, pares `e` (elétrico) ↔ `m` (mecânico). Uma peça
   pode ter vários pares. Uma peça com foto fora do gabarito não tem par: ligá-la é erro.
