@@ -26,6 +26,8 @@
  *
  * Text that is shown to the player may be a string or { pt: "...", en: "..." }.
  */
+function ord(n) { var s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+
 window.FIO_DATA = {
 
   config: {
@@ -46,6 +48,10 @@ window.FIO_DATA = {
     // ("afterCheck"); "always" shows it from the start. Step 3 always shows it.
     // A node may set `masterString` to override the computed one.
     showMasterString: "afterCheck",
+    // Scoreboard: saved in this browser (localStorage), shown at the end and from the welcome
+    // screen. Double-click its title for the organiser tools (export CSV, clear).
+    scoreboardTop: 10,
+    scoreboardKey: "fio-3dday-scores",
     // Hint on correct links: electric current (steps 1 and 3) or turning gears (step 2).
     // true = as soon as a correct link is made; false = only after Check.
     currentOnLink: true,
@@ -158,6 +164,15 @@ window.FIO_DATA = {
   ui: {
     pt: {
       langName: "Português",
+      namePlaceholder: "O teu nome (para a classificação)",
+      anon: "Visitante",
+      board: "Classificação",
+      byTime: "Por tempo", byScore: "Por pontos",
+      colName: "Nome", colTime: "Tempo", colScore: "Pontos", colWhen: "Hora",
+      boardEmpty: "Ainda ninguém jogou. Sê o primeiro!",
+      yourPlace: (r, t, by) => "Ficaste em " + r + ".º lugar " + (by === "score" ? "por pontos" : "por tempo") + " (" + t + ").",
+      rankShort: r => r + ".º lugar",
+      exportCsv: "Exportar CSV", clearAll: "Apagar tudo", clearSure: "Apagar mesmo?", close: "Fechar",
       toFind: n => n + (n === 1 ? " relação para encontrar" : " relações para encontrar"),
       toFindLong: n => "Neste passo há " + n + (n === 1 ? " relação certa." : " relações certas."),
       brandSub: "Factory Information Organizer",
@@ -255,6 +270,15 @@ window.FIO_DATA = {
     },
     en: {
       langName: "English",
+      namePlaceholder: "Your name (for the leaderboard)",
+      anon: "Visitor",
+      board: "Leaderboard",
+      byTime: "By time", byScore: "By points",
+      colName: "Name", colTime: "Time", colScore: "Points", colWhen: "At",
+      boardEmpty: "Nobody has played yet. Be the first!",
+      yourPlace: (r, t, by) => "You came " + ord(r) + " " + (by === "score" ? "by points" : "by time") + " (" + t + ").",
+      rankShort: r => ord(r) + " place",
+      exportCsv: "Export CSV", clearAll: "Clear all", clearSure: "Really clear?", close: "Close",
       toFind: n => n + (n === 1 ? " relation to find" : " relations to find"),
       toFindLong: n => "There " + (n === 1 ? "is 1 correct relation" : "are " + n + " correct relations") + " in this step.",
       brandSub: "Factory Information Organizer",

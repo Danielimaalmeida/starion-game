@@ -23,7 +23,8 @@ Tecla `F` alterna ecrã inteiro. Idioma: botões **Português / English** no ecr
 
 ## Fluxo
 
-1. Ecrã inicial (volta-se aqui ao fim de 60 s sem interação).
+1. Ecrã inicial (volta-se aqui ao fim de 60 s sem interação). O visitante escreve o nome
+   (opcional; sem nome fica "Visitante N") e carrega em Começar ou Enter.
 2. "Como funciona": o desafio de negócio (a mesma estação no ePlan e, na mecânica, nas BOMs e no Layout file), os níveis
    da árvore com um exemplo fictício (`rulesExample` em `data.js`, para não dar respostas)
    e as regras. O cronómetro só começa ao fechar este ecrã.
@@ -56,6 +57,22 @@ Tecla `F` alterna ecrã inteiro. Idioma: botões **Português / English** no ecr
   `Continuar` passa ao passo seguinte.
 - `Recomeçar` volta ao passo 1. Se já houver progresso, pede um segundo clique.
 - Sem interação durante 60 s: aviso de 10 s e volta ao ecrã inicial.
+
+## Classificação
+
+- O tempo conta desde que se fecha o "Como funciona" até ao Verificar do passo 3.
+  Cada jogo que chega ao fim fica guardado com nome, tempo e pontos.
+- Depois do "Tu vs. FIO" abre a classificação com a linha do jogador destacada
+  ("Ficaste em 3.º lugar"). Ordena por tempo (por omissão) ou por pontos; mostra os 10
+  primeiros (`config.scoreboardTop`) e, se o jogador ficar abaixo, também a sua linha.
+- Botão 🏆 no ecrã inicial e no cabeçalho no fim do jogo. `Esc` fecha.
+- Fica no `localStorage` do browser: sobrevive a fechar e reabrir, mas é só daquele
+  portátil e daquele browser. Não uses janela anónima.
+- Ferramentas da organização: duplo clique no título "Classificação" mostra
+  **Exportar CSV** (descarrega todos os jogos, ordenados por tempo) e **Apagar tudo**
+  (pede um segundo clique). Para guardar uma cópia, exporta no fim de cada dia.
+- Tempo baixo com poucos pontos ainda aparece no topo por tempo; a coluna de pontos e a
+  ordenação por pontos ajudam a decidir o vencedor.
 
 ## Trocar o conteúdo
 

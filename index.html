@@ -202,6 +202,37 @@
   .lang { height: calc(var(--u) * 6); padding: 0 calc(var(--u) * 3); border-radius: 999px; font-size: calc(var(--u) * 2.3); font-weight: 700;
           background: transparent; color: #fff; border: calc(var(--u) * .25) solid rgba(255,255,255,.5); }
   .lang.on { background: #fff; color: var(--navy); border-color: #fff; }
+  .namebox { width: calc(var(--u) * 46); height: calc(var(--u) * 6.4); margin: 0 0 calc(var(--u) * 2.5); padding: 0 calc(var(--u) * 2);
+             border-radius: 999px; border: calc(var(--u) * .3) solid rgba(255,255,255,.6); background: rgba(255,255,255,.1); color: #fff;
+             font: inherit; font-size: calc(var(--u) * 2.5); text-align: center; outline: none; }
+  .namebox::placeholder { color: rgba(255,255,255,.6); }
+  .namebox:focus { border-color: #ffd23f; background: rgba(255,255,255,.16); }
+  .wboard { margin-top: calc(var(--u) * 2.5); }
+  /* scoreboard */
+  .bcard { background: #fff; color: var(--ink); border-radius: calc(var(--u) * 2); padding: calc(var(--u) * 3) calc(var(--u) * 4);
+           width: min(100%, calc(var(--u) * 110)); max-height: 92vh; display: flex; flex-direction: column; align-items: center;
+           box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 4) rgba(0,0,0,.35); }
+  .bcard h2 { margin: 0 0 calc(var(--u) * 1.5); font-size: calc(var(--u) * 4.6); cursor: default; }
+  .bsort { display: flex; gap: calc(var(--u) * 1); margin-bottom: calc(var(--u) * 1.2); }
+  .sortb { height: calc(var(--u) * 4.6); padding: 0 calc(var(--u) * 2.4); border-radius: 999px; border: calc(var(--u) * .25) solid #c9d1dd;
+           background: #fff; color: var(--navy); font-weight: 700; font-size: calc(var(--u) * 1.9); }
+  .sortb.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .bmsg { min-height: calc(var(--u) * 3); font-size: calc(var(--u) * 2.3); font-weight: 700; color: var(--ok); margin-bottom: calc(var(--u) * .8); }
+  .bwrap { width: 100%; overflow: auto; flex: 1; min-height: 0; margin-bottom: calc(var(--u) * 2); }
+  #bTable { width: 100%; border-collapse: collapse; font-size: calc(var(--u) * 2.2); text-align: left; }
+  #bTable th:nth-child(n+3), #bTable td.num { text-align: right; }
+  #bTable th { text-align: left; font-size: calc(var(--u) * 1.7); color: var(--muted); text-transform: uppercase; letter-spacing: .06em;
+               padding: calc(var(--u) * .6) calc(var(--u) * 1.2); border-bottom: calc(var(--u) * .2) solid #e2e7ef; position: sticky; top: 0; background: #fff; }
+  #bTable td { padding: calc(var(--u) * .7) calc(var(--u) * 1.2); border-bottom: 1px solid #edf0f5; }
+  #bTable td.num { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; white-space: nowrap; }
+  #bTable td.rk { font-weight: 800; color: var(--muted); width: calc(var(--u) * 5); }
+  #bTable tr.top td.rk { color: #c58b00; }
+  #bTable tr.me td { background: #fff6d6; font-weight: 800; }
+  #bTable tr.gap td { text-align: center; color: var(--muted); padding: calc(var(--u) * .2); }
+  #bTable td.empty { text-align: center; color: var(--muted); padding: calc(var(--u) * 3); }
+  .badmin { display: flex; gap: calc(var(--u) * 1.2); margin-bottom: calc(var(--u) * 2); }
+  .badmin.hidden { display: none; }
+  .badmin .btn:not(.warnb) { border: calc(var(--u) * .25) solid #c9d1dd; color: var(--navy); background: #fff; }
   .btn.big { height: calc(var(--u) * 10); padding: 0 calc(var(--u) * 7); font-size: calc(var(--u) * 4); border-radius: calc(var(--u) * 2); }
   #idle { z-index: 20; }
   /* how-it-works screen */
@@ -248,6 +279,7 @@
       <button class="btn" id="btnHint" type="button"></button>
       <button class="btn" id="btnClear" type="button"></button>
       <button class="btn primary" id="btnCheck" type="button"></button>
+      <button class="btn primary hidden" id="btnBoard" type="button"></button>
       <button class="btn ghost" id="btnHelp" type="button">?</button>
       <button class="btn ghost" id="btnReset" type="button"></button>
     </div>
@@ -275,7 +307,20 @@
   <p class="lead" id="wLead"></p>
   <div class="steps" id="wSteps"></div>
   <div class="langs" id="wLangs"></div>
+  <input class="namebox" id="wName" type="text" maxlength="24" autocomplete="off" spellcheck="false">
   <button class="btn primary big" id="btnStart" type="button"></button>
+  <button class="lang wboard" id="wBoard" type="button"></button>
+</div>
+
+<div class="overlay dark hidden" id="board">
+  <div class="bcard">
+    <h2 id="bTitle"></h2>
+    <div class="bsort"><button class="sortb" id="bByTime" type="button"></button><button class="sortb" id="bByScore" type="button"></button></div>
+    <div class="bmsg" id="bMsg"></div>
+    <div class="bwrap"><table id="bTable"><thead><tr><th>#</th><th id="bhName"></th><th id="bhTime"></th><th id="bhScore"></th><th id="bhWhen"></th></tr></thead><tbody></tbody></table></div>
+    <div class="badmin hidden" id="bAdmin"><button class="btn" id="bExport" type="button"></button><button class="btn warnb" id="bClear" type="button"></button></div>
+    <button class="btn primary big" id="bClose" type="button"></button>
+  </div>
 </div>
 
 <div class="overlay rules hidden" id="rules">
@@ -836,7 +881,7 @@
     } else if (mode === "fio") {
       var t = total(), sc2 = make("span", "score"); sc2.appendChild(make("b", null, String(t.got)));
       sc2.appendChild(make("small", null, "/ " + t.max + " " + T.points + " (" + T.total.toLowerCase() + ")")); s.appendChild(sc2);
-      var parts = T.you + " " + fmtTime(endTime - startTime);
+      var parts = T.you + " " + fmtTime(finalTime) + (myRank ? "  ·  " + T.rankShort(myRank) : "");
       if (cfg.fioSeconds != null) parts += "  ·  " + T.fioLabel + " " + String(cfg.fioSeconds).replace(".", ",") + " s";
       s.appendChild(make("span", "dim mono", parts));
     }
@@ -844,6 +889,7 @@
   function renderButtons() {
     var left = Math.max(0, cfg.maxHints - hint.used), last = step === STEPS.length - 1;
     $("btnHint").classList.toggle("hidden", mode !== "play");
+    $("btnBoard").classList.toggle("hidden", mode !== "fio"); $("btnBoard").textContent = "🏆 " + T.board;
     $("btnHint").textContent = T.hint + " (" + left + ")"; $("btnHint").disabled = left === 0;
     $("btnClear").classList.toggle("hidden", mode !== "play"); $("btnClear").textContent = T.clear; $("btnClear").disabled = links.length === 0;
     var bc = $("btnCheck");
@@ -960,6 +1006,7 @@
   function hideExplanations() { $("rules").classList.add("hidden"); $("stepIntro").classList.add("hidden"); }
   function startGame() {
     started = true; scores = []; maxes = []; zoom = 1; applyScale();
+    playerName = ($("wName").value || "").replace(/\s+/g, " ").trim().slice(0, 24); finalTime = 0; myRank = 0; myEntry = null;
     $("welcome").classList.add("hidden"); hideIdle();
     lastActivity = Date.now(); startTime = Date.now(); resetArmedUntil = 0;
     enterStep(0);
@@ -967,7 +1014,8 @@
   }
   function toWelcome() {
     started = false; links = []; results = null; armed = null; clearHint(); hint.used = 0; resetArmedUntil = 0;
-    ghost.replaceChildren(); svg.replaceChildren(); marks.replaceChildren(); hideIdle(); hideExplanations(); $("welcome").classList.remove("hidden");
+    ghost.replaceChildren(); svg.replaceChildren(); marks.replaceChildren(); hideIdle(); hideExplanations(); closeBoard();
+    $("wName").value = ""; myEntry = null; myRank = 0; $("welcome").classList.remove("hidden"); $("wName").focus();
   }
   function check() {
     var key = keyList();
@@ -980,9 +1028,13 @@
     var score = Math.max(0, correct * P_.correct + wrong * P_.wrong + hint.used * P_.hint);
     results = { items: items, missing: missing, correct: correct, wrong: wrong, score: score, max: key.length };
     scores[step] = score; maxes[step] = key.length;
+    if (step === STEPS.length - 1) { finalTime = Date.now() - startTime; saveResult(); }
     armed = null; clearHint(); mode = "checked"; endTime = Date.now(); dirty = false; render();
   }
-  function showFio() { mode = "fio"; animateFio = true; endTime = Date.now(); render(); }
+  function showFio() {
+    mode = "fio"; animateFio = true; render();
+    setTimeout(function () { if (started && mode === "fio") openBoard(); }, 3500);   // after the FIO has drawn its links
+  }
   function nextStep() { if (step < STEPS.length - 1) enterStep(step + 1); else showFio(); }
   function clearStep() { links = []; armed = null; clearHint(); dirty = true; render(); }
   function resetAll() {
@@ -993,6 +1045,55 @@
       return;
     }
     startGame();
+  }
+
+  // ---------- scoreboard (kept in this browser's localStorage, so it works offline) ----------
+  var BOARD_KEY = cfg.scoreboardKey || "fio-3dday-scores";
+  var playerName = "", finalTime = 0, myRank = 0, myEntry = null, boardSort = "time";
+  function loadBoard() { try { return JSON.parse(localStorage.getItem(BOARD_KEY)) || []; } catch (_) { return []; } }
+  function storeBoard(list) { try { localStorage.setItem(BOARD_KEY, JSON.stringify(list)); return true; } catch (_) { return false; } }
+  function sortBoard(list, by) {
+    return list.slice().sort(function (a, b) {
+      return by === "score" ? (b.points - a.points) || (a.ms - b.ms) : (a.ms - b.ms) || (b.points - a.points);
+    });
+  }
+  function saveResult() {
+    var list = loadBoard(), t = total();
+    myEntry = { id: Date.now() + "-" + Math.random().toString(36).slice(2, 7), name: playerName || (T.anon + " " + (list.length + 1)),
+                ms: finalTime, points: t.got, max: t.max, at: new Date().toISOString(), lang: lang };
+    list.push(myEntry); storeBoard(list.slice(-1000));
+    myRank = sortBoard(loadBoard(), "time").findIndex(function (e) { return e.id === myEntry.id; }) + 1;
+  }
+  function renderBoard() {
+    var list = sortBoard(loadBoard(), boardSort), body = $("bTable").querySelector("tbody"), top = cfg.scoreboardTop || 10;
+    body.replaceChildren();
+    $("bByTime").classList.toggle("on", boardSort === "time"); $("bByScore").classList.toggle("on", boardSort === "score");
+    if (!list.length) { var tr0 = make("tr"), td0 = make("td", "empty", T.boardEmpty); td0.colSpan = 5; tr0.appendChild(td0); body.appendChild(tr0); }
+    var mine = myEntry ? list.findIndex(function (e) { return e.id === myEntry.id; }) : -1;
+    var row = function (e, i) {
+      var tr = make("tr", (i < 3 ? "top" : "") + (myEntry && e.id === myEntry.id ? " me" : ""));
+      tr.appendChild(make("td", "rk", (i < 3 ? ["🥇", "🥈", "🥉"][i] : String(i + 1))));
+      tr.appendChild(make("td", null, e.name));
+      tr.appendChild(make("td", "num", fmtTime(e.ms)));
+      tr.appendChild(make("td", "num", e.points + " / " + e.max));
+      var d = new Date(e.at); tr.appendChild(make("td", "num", isNaN(d) ? "" : d.toLocaleTimeString(lang === "pt" ? "pt-PT" : "en-GB", { hour: "2-digit", minute: "2-digit" })));
+      body.appendChild(tr);
+    };
+    list.slice(0, top).forEach(row);
+    if (mine >= top) { var g = make("tr", "gap"), gd = make("td", null, "…"); gd.colSpan = 5; g.appendChild(gd); body.appendChild(g); row(list[mine], mine); }
+    $("bMsg").textContent = myEntry && mine >= 0 ? T.yourPlace(mine + 1, fmtTime(myEntry.ms), boardSort) : "";
+  }
+  function openBoard() { renderBoard(); $("board").classList.remove("hidden"); }
+  function closeBoard() { $("board").classList.add("hidden"); $("bAdmin").classList.add("hidden"); clearArmed = 0; renderClear(); }
+  var clearArmed = 0;
+  function renderClear() { $("bClear").textContent = Date.now() < clearArmed ? T.clearSure : T.clearAll; }
+  function exportCsv() {
+    var rows = [["rank_by_time", "name", "time_s", "points", "max", "finished_at", "lang"]];
+    sortBoard(loadBoard(), "time").forEach(function (e, i) { rows.push([i + 1, e.name, Math.round(e.ms / 1000), e.points, e.max, e.at, e.lang]); });
+    var csv = rows.map(function (r) { return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(","); }).join("\n");
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+    a.download = "fio-3dday-classificacao.csv"; document.body.appendChild(a); a.click(); a.remove();
   }
 
   // ---------- idle / kiosk ----------
@@ -1013,6 +1114,8 @@
   document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
   document.addEventListener("dragstart", function (e) { e.preventDefault(); });
   document.addEventListener("keydown", function (e) {
+    if (e.target && e.target.tagName === "INPUT") { if (e.key === "Enter" && !started) { e.preventDefault(); startGame(); } return; }
+    if (!$("board").classList.contains("hidden") && (e.key === "Escape" || e.key === "Enter" || e.key === " ")) { e.preventDefault(); closeBoard(); return; }
     var mod = e.ctrlKey || e.metaKey;
     if (mod && (e.key === "-" || e.key === "_")) { e.preventDefault(); setZoom(zoom / 1.15); }
     else if (mod && (e.key === "+" || e.key === "=")) { e.preventDefault(); setZoom(zoom * 1.15); }
@@ -1105,6 +1208,17 @@
 
   // ---------- wiring ----------
   $("btnStart").addEventListener("click", startGame);
+  $("wBoard").addEventListener("click", openBoard);
+  $("btnBoard").addEventListener("click", openBoard);
+  $("bClose").addEventListener("click", closeBoard);
+  $("bByTime").addEventListener("click", function () { boardSort = "time"; renderBoard(); });
+  $("bByScore").addEventListener("click", function () { boardSort = "score"; renderBoard(); });
+  $("bTitle").addEventListener("dblclick", function () { $("bAdmin").classList.toggle("hidden"); });   // organiser tools
+  $("bExport").addEventListener("click", exportCsv);
+  $("bClear").addEventListener("click", function () {
+    if (Date.now() < clearArmed) { storeBoard([]); myEntry = null; myRank = 0; clearArmed = 0; renderClear(); renderBoard(); return; }
+    clearArmed = Date.now() + 3000; renderClear(); setTimeout(renderClear, 3100);
+  });
   $("btnRules").addEventListener("click", closeRules);
   $("btnHelp").addEventListener("click", function () { showRules(false); });
   $("btnIntro").addEventListener("click", function () { $("stepIntro").classList.add("hidden"); });
@@ -1138,6 +1252,13 @@
   $("wLead").textContent = T.welcomeLead;
   T.steps.forEach(function (s, i) { var d = make("div", "step"); d.appendChild(make("b", null, String(i + 1))); d.appendChild(document.createTextNode(s)); $("wSteps").appendChild(d); });
   $("btnStart").textContent = T.start;
+  $("wName").placeholder = T.namePlaceholder;
+  $("wBoard").textContent = "🏆 " + T.board;
+  $("bTitle").textContent = "🏆 " + T.board;
+  $("bByTime").textContent = T.byTime; $("bByScore").textContent = T.byScore;
+  $("bhName").textContent = T.colName; $("bhTime").textContent = T.colTime; $("bhScore").textContent = T.colScore; $("bhWhen").textContent = T.colWhen;
+  $("bExport").textContent = T.exportCsv; $("bClose").textContent = T.close; renderClear();
+  $("wName").focus();
   Object.keys(D.ui).forEach(function (code) {   // switching reloads the page in that language (works offline on file://)
     var b = make("button", "lang" + (code === lang ? " on" : ""), D.ui[code].langName || code.toUpperCase());
     b.type = "button";
