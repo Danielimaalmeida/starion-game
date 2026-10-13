@@ -179,7 +179,7 @@ window.FIO_DATA = {
       playTitle: "Como jogar",
       play: [
         ["＋", "Puxa o ponto ＋ de uma peça até outra para as ligar. A ligação vai sempre do nível de cima para o de baixo."],
-        ["✋", "Arrasta as peças para arrumar a árvore."],
+        ["✋", "Arrasta as peças para arrumar a árvore. Falta espaço? A roda do rato (ou − / + no canto) afasta e aproxima."],
         ["×", "Enganaste-te? Clica no × do fio para o apagar."],
         ["🏷", "Cada peça mostra uma propriedade, o supplier. No passo 3, peças que são a mesma coisa têm o mesmo supplier, mas há iscos: confirma a foto e a descrição."],
         ["⚡", "Pista: se a ligação estiver certa, passa corrente elétrica no fio (no mecânico, rodam engrenagens).", "current"],
@@ -274,7 +274,7 @@ window.FIO_DATA = {
       playTitle: "How to play",
       play: [
         ["＋", "Pull the ＋ dot of a piece to another to link them. A link always goes from the upper level to the lower one."],
-        ["✋", "Drag pieces around to tidy up the tree."],
+        ["✋", "Drag pieces around to tidy up the tree. Need room? The mouse wheel (or − / + in the corner) zooms out and in."],
         ["×", "Made a mistake? Click the × on the thread to remove it."],
         ["🏷", "Each piece shows one property, its supplier. In step 3, pieces that are the same thing share the supplier, but there are decoys: check the photo and the description too."],
         ["⚡", "Hint: if the link is right, electric current runs through the thread (on the mechanical side, gears start turning).", "current"],

@@ -39,6 +39,9 @@ Tecla `F` alterna ecrã inteiro. Idioma: botões **Português / English** no ecr
   - Puxar o ponto ＋ de uma peça até outra: cria uma ligação (um fio). O sentido é
     automático, do nível de cima para o de baixo.
   - Também dá para clicar no ＋ e depois na outra peça.
+  - Zoom: roda do rato, pinça no trackpad, Cmd/Ctrl − / + / 0, ou os botões − % + no canto.
+    Afasta para ganhar espaço; as peças e os fios acompanham. (O zoom do browser não serve
+    aqui porque o jogo ocupa sempre o ecrã todo.)
 - Passo 3: arrastar de um cartão elétrico (laranja) para um mecânico (roxo) (ou clicar num e no outro).
   O cabeçalho e o cartão de entrada dizem quantas relações há para encontrar (hoje 3:
   robot, garra e motor SEW).
